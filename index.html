@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ExpenseFlow — Astra SO Operating Expenses</title>
+  
+  <!-- Fonts & Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ecff',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* CSS Reset & Core Styling */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Ambient dynamic gradient backdrop */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -20;
+      pointer-events: none;
+      transition: background 0.4s ease;
+    }
+
+    .dark .bg-canvas {
+      background: radial-gradient(circle at 10% 20%, rgba(30, 58, 138, 0.28) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 15%, rgba(67, 56, 202, 0.22) 0%, transparent 45%),
+                  radial-gradient(circle at 50% 85%, rgba(15, 23, 42, 0.4) 0%, transparent 50%),
+                  #070a11;
+    }
+
+    .light .bg-canvas {
+      background: radial-gradient(circle at 15% 15%, rgba(219, 234, 254, 0.75) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 25%, rgba(224, 231, 255, 0.65) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 80%, rgba(241, 245, 249, 0.9) 0%, transparent 55%),
+                  #f8fafc;
+    }
+
+    /* Physical Specular Glass Tokens */
+    .glass-panel {
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dark .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .light .glass-panel {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 12px 30px -10px rgba(148, 163, 184, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+    }
+
+    .glass-input {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+    }
+
+    .dark .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .dark .glass-input:focus {
+      background: rgba(15, 23, 42, 0.85);
+      border-color: rgba(59, 130, 246, 0.7);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+
+    .light .glass-input {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      color: #0f172a;
+    }
+
+    .light .glass-input:focus {
+      background: #ffffff;
+      border-color: rgba(37, 99, 235, 0.7);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Custom Hide Scrollbar */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="text-slate-800 dark:text-slate-100 antialiased selection:bg-blue-500/30 selection:text-blue-500">
+
+  <!-- Ambient Dynamic Gradient Mesh Background -->
+  <div class="bg-canvas"></div>
+
+  <div class="flex h-screen w-screen overflow-hidden">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="hidden md:flex w-64 flex-col justify-between glass-panel border-r border-slate-200/60 dark:border-white/10 z-30 p-4">
+      <div class="space-y-6">
+        <!-- Brand Header -->
+        <div class="flex items-center gap-3 px-2 py-1">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/30 border border-white/20">
+            EF
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-sm tracking-tight text-slate-900 dark:text-white">ExpenseFlow</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">SO</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Astra SO 2021 &bull; SAP ECC</p>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="space-y-1">
+          <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-blue-600/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 transition-all text-left">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+              <span>Buku Beban Opex</span>
+            </div>
+            <kbd class="text-[10px] font-mono opacity-60">D</kbd>
+          </button>
+
+          <button onclick="switchView('coa')" id="nav-coa" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-500/10 transition-all text-left">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+              <span>Kamus COA Astra</span>
+            </div>
+            <kbd class="text-[10px] font-mono opacity-60">K</kbd>
+          </button>
+
+          <button onclick="switchView('approvals')" id="nav-approvals" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-500/10 transition-all text-left">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>Persetujuan Akun</span>
+            </div>
+            <span id="badgeDesktopApprovals" class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-slate-500/15 text-slate-500 dark:text-slate-400">0</span>
+          </button>
+
+          <button onclick="switchView('account')" id="nav-account" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-500/10 transition-all text-left">
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.27.1.06-.12l-.773.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.15.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.27-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <span>API & Google Sheet</span>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      <!-- User Profile & Session info -->
+      <div class="pt-4 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
+            AS
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-bold truncate text-slate-800 dark:text-white">Astra FinOps Lead</p>
+            <p class="text-[10px] text-slate-400 truncate">SO Branch Jakarta</p>
+          </div>
+        </div>
+        <div id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-slate-400" title="Status Database"></div>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+      <!-- TOP HEADER -->
+      <header class="h-14 sm:h-16 px-4 sm:px-8 border-b border-slate-200/60 dark:border-white/10 glass-panel flex items-center justify-between z-20 flex-shrink-0">
+        
+        <!-- Left Title Section -->
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-700 to-indigo-600 flex md:hidden items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-sm">
+            EF
+          </div>
+          
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 id="pageTitle" class="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                Buku Beban Operasional
+              </h1>
+              <span class="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                FY-2026 Q3
+              </span>
+            </div>
+            <p id="pageSubtitle" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+              Astra Sales Operation (SO 2021) &bull; Selling & G&A
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          
+          <!-- Sync / Gas Status Indicator Button -->
+          <button onclick="triggerManualSync()" title="Sinkronkan dengan Google Sheets" class="p-2 sm:px-3 sm:py-1.5 rounded-xl glass-panel text-slate-700 dark:text-slate-200 hover:text-blue-500 text-xs font-semibold flex items-center gap-1.5">
+            <svg id="syncIconSvg" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            <span class="hidden sm:inline" id="syncStatusLabel">Tarik Data Sheet</span>
+          </button>
+
+          <!-- Desktop Primary Button -->
+          <button onclick="openTransactionModal()" class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            <span>Catat Beban</span>
+          </button>
+
+          <!-- iOS Specular Theme Switcher -->
+          <button onclick="toggleTheme()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl glass-panel flex items-center justify-center text-slate-600 dark:text-amber-400 hover:scale-105 transition-all">
+            <svg id="themeIconSun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+            <svg id="themeIconMoon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="workspaceScrollContainer" class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
+
+        <!-- VIEW 1: DASHBOARD / BUKU TRANSAKSI -->
+        <section id="view-dashboard" class="space-y-6">
+
+          <!-- 3-Column Balanced KPI Grid (Initial 0 baseline) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            
+            <!-- KPI 1: Total Realisasi Opex -->
+            <div class="p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden">
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-medium">Total Beban Berjalan</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold">SO 2021</span>
+              </div>
+              <div class="mt-2 flex items-baseline gap-1">
+                <span class="text-xs font-mono text-slate-400">Rp</span>
+                <span id="kpiTotalOpex" class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">0</span>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Plafon Bulanan: <strong>Rp 85,0M</strong></span>
+                <span id="kpiBurnPercent" class="text-emerald-500 font-semibold font-mono">0,0%</span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                <div id="kpiProgressBar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- KPI 2: Komparasi SE vs G&A -->
+            <div class="p-4 sm:p-5 rounded-2xl glass-panel">
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-medium">Distribusi Beban Opex</span>
+                <span class="text-[10px] font-mono text-slate-400">SAP Breakdown</span>
+              </div>
+              <div class="mt-2.5 space-y-1.5 text-xs font-mono">
+                <div class="flex justify-between items-center">
+                  <span class="text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 7100 Selling (SE)
+                  </span>
+                  <span id="kpiSeTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> 7200 General (GA)
+                  </span>
+                  <span id="kpiGaTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
+                </div>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-2.5 flex overflow-hidden">
+                <div id="kpiSeBar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%;"></div>
+                <div id="kpiGaBar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- KPI 3: Integritas & Otorisasi Dual-Control -->
+            <div class="p-4 sm:p-5 rounded-2xl glass-panel">
+              <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-medium">Tata Kelola & Validasi</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">PSAK Astra</span>
+              </div>
+              <div class="mt-2 flex items-baseline justify-between">
+                <div>
+                  <span id="kpiTotalEntries" class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">0</span>
+                  <span class="text-xs text-slate-400 ml-1">Transaksi</span>
+                </div>
+                <span id="kpiPendingBadge" class="text-xs font-mono font-bold text-slate-400 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 0 Pending COA
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 truncate">
+                Level Audit: <strong>Astra Internal Audit Compliant</strong>
+              </p>
+              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                <div class="bg-emerald-500 h-full rounded-full" style="width: 100%;"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="space-y-3">
+            <!-- Search & Filter Bar -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              
+              <!-- Quick Search Input -->
+              <div class="relative flex-1 max-w-md">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input 
+                  id="tableSearchInput" 
+                  type="text" 
+                  placeholder="Cari transaksi, SPK, nota, cost center, atau akun..." 
+                  oninput="handleSearch(this.value)"
+                  class="w-full glass-input text-xs pl-9 pr-4 py-2.5 rounded-xl focus:outline-none"
+                >
+              </div>
+
+              <!-- Export and Reset -->
+              <div class="flex items-center gap-2 self-end sm:self-auto">
+                <button onclick="exportToCsv()" class="px-3 py-2 rounded-xl glass-panel text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-500 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Pills Horizontal Scroller matching Astra SO Categories -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+              <button onclick="setFilter('ALL', this)" class="filter-pill px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-sm transition-all whitespace-nowrap">
+                Semua
+              </button>
+              <button onclick="setFilter('7100', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                7100 Selling (SE)
+              </button>
+              <button onclick="setFilter('7210', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                7210 Personalia
+              </button>
+              <button onclick="setFilter('7230', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                7230 Utilitas & Telko
+              </button>
+              <button onclick="setFilter('7240', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                7240 Perawatan Fasilitas
+              </button>
+              <button onclick="setFilter('7250', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                7250 IT & Software
+              </button>
+            </div>
+          </div>
+
+          <!-- MOBILE CARDS CONTAINER (Clean Zero-State when empty) -->
+          <div id="mobileCardsContainer" class="block md:hidden space-y-3">
+            <!-- Injected via JS -->
+          </div>
+
+          <!-- DESKTOP TABLE (Clean Zero-State when empty) -->
+          <div class="hidden md:block rounded-2xl glass-panel overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="border-b border-slate-200/60 dark:border-white/10 text-slate-400 font-mono text-[11px] bg-black/5 dark:bg-white/5">
+                  <tr>
+                    <th class="py-3 px-4">TANGGAL & REF</th>
+                    <th class="py-3 px-4">KODE SAP & AKUN</th>
+                    <th class="py-3 px-4">COST CENTER</th>
+                    <th class="py-3 px-4">KETERANGAN & DETAIL</th>
+                    <th class="py-3 px-4">SUMBER DANA</th>
+                    <th class="py-3 px-4 text-right">NOMINAL (IDR)</th>
+                    <th class="py-3 px-4 text-center">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody id="desktopTableBody" class="divide-y divide-slate-200/50 dark:divide-white/5 font-sans">
+                  <!-- Dynamically injected via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Ledger Table Summary Footer -->
+            <div class="p-3.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 bg-black/5 dark:bg-white/5">
+              <span id="tableSummaryCount">Menampilkan 0 transaksi</span>
+              <div class="flex items-center gap-2">
+                <span>Subtotal Ditampilkan:</span>
+                <span id="tableSummaryTotal" class="font-bold text-slate-900 dark:text-white text-sm">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- VIEW 2: KAMUS AKUN & COA ASTRA SO 2021 -->
+        <section id="view-coa" class="hidden space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl glass-panel">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white">Chart of Accounts (COA) Astra SO 2021</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Struktur 8-Digit SAP ECC: Selling Expenses (71000000) & General Administrative (72000000)</p>
+            </div>
+            <button onclick="openProposalDrawer()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-500/20 self-start sm:self-auto">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span>Ajukan Akun Leaf Baru</span>
+            </button>
+          </div>
+
+          <!-- COA Quick Search Filter -->
+          <div class="relative">
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input 
+              id="coaFilterInput" 
+              type="text" 
+              placeholder="Cari kode akun atau nama akun dalam kamus COA Astra..." 
+              oninput="filterCoaTree(this.value)"
+              class="w-full glass-input text-xs pl-9 pr-4 py-2.5 rounded-xl focus:outline-none"
+            >
+          </div>
+
+          <div id="coaTreeContainer" class="space-y-4">
+            <!-- COA Tree injected via JS -->
+          </div>
+        </section>
+
+        <!-- VIEW 3: PERSETUJUAN KODE AKUN (APPROVAL QUEUE) -->
+        <section id="view-approvals" class="hidden space-y-4">
+          <div class="p-5 rounded-2xl glass-panel">
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">Antrean Tata Kelola Akun (Dual-Control)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Proposal penambahan leaf-account baru memerlukan verifikasi controller Astra SO sebelum dapat diposting</p>
+          </div>
+
+          <div id="approvalQueueContainer" class="space-y-3">
+            <!-- Dynamic zero state or proposals injected via JS -->
+          </div>
+        </section>
+
+        <!-- VIEW 4: PROFIL & INTEGRASI GOOGLE SHEETS / KODE.GS -->
+        <section id="view-account" class="hidden space-y-5">
+          
+          <!-- User & Branch Profile -->
+          <div class="p-5 rounded-2xl glass-panel">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-md">
+                AS
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">FinOps Controller SO</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">operator.so@astra-international.co.id</p>
+                <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  <span>Unit: <strong>Astra Sales Operation (SO)</strong></span>
+                  <span>&bull;</span>
+                  <span>Branch: <strong>Jakarta Head Office</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Google Apps Script & Sheets Integration Config -->
+          <div class="p-5 rounded-2xl glass-panel space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">Integrasi Database Google Sheets (`kode.gs`)</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Hubungkan ExpenseFlow dengan Google Apps Script Web App untuk sinkronisasi cloud live</p>
+              </div>
+              <button onclick="openScriptModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold self-start sm:self-auto shadow-sm">
+                Lihat Kode `kode.gs`
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Google Apps Script Web App URL</label>
+                <input 
+                  id="cfgGasUrl" 
+                  type="text" 
+                  placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                  class="w-full glass-input text-xs font-mono px-3.5 py-2.5 rounded-xl focus:outline-none"
+                >
+                <p class="text-[10px] text-slate-400 mt-1">Dihasilkan saat Deploy Web App (Access: Anyone)</p>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">API Security Token</label>
+                <input 
+                  id="cfgApiToken" 
+                  type="password" 
+                  placeholder="contoh: astra-secret-token-2026"
+                  class="w-full glass-input text-xs font-mono px-3.5 py-2.5 rounded-xl focus:outline-none"
+                >
+                <p class="text-[10px] text-slate-400 mt-1">Token rahasia sama yang diset di file `kode.gs`</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-white/10">
+              <span id="cfgStatusText" class="text-xs font-mono text-slate-500">Tersimpan di local browser</span>
+              <div class="flex gap-2">
+                <button onclick="testGasConnection()" class="px-3 py-1.5 rounded-xl glass-panel text-xs font-semibold hover:text-blue-500">
+                  Uji Koneksi
+                </button>
+                <button onclick="saveGasConfig()" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md">
+                  Simpan Konfigurasi
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- MOBILE FLOATING GLASS BAR -->
+      <nav class="md:hidden fixed bottom-3 inset-x-3 h-14 rounded-2xl glass-panel border border-white/40 dark:border-white/15 flex items-center justify-around px-2 z-40 shadow-2xl">
+        
+        <!-- Tab 1: Dashboard / Buku -->
+        <button onclick="switchView('dashboard')" id="mobile-nav-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 text-blue-600 dark:text-blue-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+          <span class="text-[9px] font-bold mt-0.5">Buku</span>
+        </button>
+
+        <!-- Tab 2: COA Kamus -->
+        <button onclick="switchView('coa')" id="mobile-nav-coa" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+          <span class="text-[9px] font-bold mt-0.5">Kamus</span>
+        </button>
+
+        <!-- CENTER FLOATING ACTION: CATAT BEBAN -->
+        <button onclick="openTransactionModal()" class="flex flex-col items-center justify-center -mt-5 mx-1">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 border border-white/30 active:scale-95 transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </div>
+          <span class="text-[9px] font-bold text-blue-600 dark:text-blue-400 mt-1">Catat</span>
+        </button>
+
+        <!-- Tab 3: Approval -->
+        <button onclick="switchView('approvals')" id="mobile-nav-approvals" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400 relative">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="text-[9px] font-bold mt-0.5">Approval</span>
+          <span id="mobileBadgeDot" class="w-2 h-2 rounded-full bg-amber-500 absolute top-1 right-3 hidden"></span>
+        </button>
+
+        <!-- Tab 4: Akun & Settings -->
+        <button onclick="switchView('account')" id="mobile-nav-account" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 dark:text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.27.1.06-.12l-.773.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.15.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.27-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.11v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="text-[9px] font-bold mt-0.5">Akun</span>
+        </button>
+
+      </nav>
+
+    </main>
+  </div>
+
+  <!-- TRANSACTION INPUT MODAL -->
+  <div id="transactionModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md">
+    <div class="w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl glass-panel p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Mobile Pull Bar -->
+      <div class="w-12 h-1 rounded-full bg-slate-400/40 mx-auto block sm:hidden -mt-1 mb-2"></div>
+
+      <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Catat Beban Operasional</h3>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Entri voucher beban standar Astra SO 2021</p>
+        </div>
+        <button onclick="closeTransactionModal()" class="p-1.5 rounded-lg hover:bg-slate-500/10 text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="expenseForm" onsubmit="handleSaveExpense(event)" class="space-y-3.5 text-xs">
+        
+        <!-- Keterangan & Smart Intent Matcher -->
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            Keterangan Transaksi <span class="text-blue-500 font-normal">(Smart Matcher Aktif)</span>
+          </label>
+          <input 
+            id="fKeterangan" 
+            type="text" 
+            required 
+            placeholder="Ketik uraian (cth: beli sparepart genset, token listrik pln, cetak brosur spk)"
+            oninput="triggerSmartIntent(this.value)"
+            class="w-full glass-input px-3.5 py-2.5 rounded-xl focus:outline-none"
+          >
+          
+          <!-- Smart Matcher Suggestion Box -->
+          <div id="smartSuggestionCard" class="hidden mt-2 p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-between">
+            <div class="min-w-0 pr-2">
+              <div class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold text-[11px]">
+                <span>⚡ Saran Akun:</span>
+                <span id="suggestedMatchScore" class="font-mono text-[10px] bg-blue-500/20 px-1 rounded">96%</span>
+              </div>
+              <p id="suggestedAccountName" class="text-xs text-slate-800 dark:text-slate-200 font-bold truncate">72403000 - Beban Servis & Sparepart Genset Cadangan</p>
+            </div>
+            <button type="button" onclick="applySuggestedAccount()" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[10px] whitespace-nowrap shadow-sm">
+              ✓ Pakai
+            </button>
+          </div>
+        </div>
+
+        <!-- Hierarchical COA Leaf Dropdown (Astra SO 2021) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-semibold text-slate-700 dark:text-slate-300">Kode & Nama Akun (Leaf Node)</label>
+            <button type="button" onclick="openProposalDrawer()" class="text-blue-600 dark:text-blue-400 font-semibold text-[10px] hover:underline flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span>Ajukan Akun Baru</span>
+            </button>
+          </div>
+          <select id="fAkunCoa" required class="w-full glass-input px-3 py-2.5 rounded-xl focus:outline-none font-mono text-xs">
+            <option value="">-- Pilih Akun COA Astra SO --</option>
+            <optgroup label="71000000 - Selling Expenses (SE)">
+              <option value="71101000">71101000 - Ekspedisi & Car Carrier Pengiriman Unit</option>
+              <option value="71102000">71102000 - Jasa Towing & Storing Kendaraan</option>
+              <option value="71201000">71201000 - Pameran, Mall Exhibition & Event Display</option>
+              <option value="71202000">71202000 - Iklan Media Digital, Cetak & Billboard</option>
+              <option value="71203000">71203000 - Brosur, Flyer, Merchandise & Souvenir SPK</option>
+              <option value="71301000">71301000 - BBM, Tol & Parkir Armada Test Drive Sales</option>
+              <option value="71302000">71302000 - Service & Pemeliharaan Mobil Sales</option>
+              <option value="71401000">71401000 - Insentif Pencapaian Target Sales Force</option>
+            </optgroup>
+            <optgroup label="72000000 - General & Administrative (G&A)">
+              <option value="72101000">72101000 - Gaji Pokok, Tunjangan & Lembur Staf</option>
+              <option value="72102000">72102000 - BPJS Ketenagakerjaan & Kesehatan SO</option>
+              <option value="72103000">72103000 - Konsumsi Lembur & Kesejahteraan Karyawan</option>
+              <option value="72201000">72201000 - Alat Tulis Kantor (ATK) & Form SPK</option>
+              <option value="72202000">72202000 - Fotokopi & Penggandaan Dokumen</option>
+              <option value="72301000">72301000 - Listrik PLN Gardu Cabang & Showroom</option>
+              <option value="72302000">72302000 - Air Bersih PDAM & Air Minum Galon</option>
+              <option value="72303000">72303000 - Internet Fiber Optic, Bandwidth & VPN</option>
+              <option value="72401000">72401000 - Perawatan Gedung & Fasilitas Showroom</option>
+              <option value="72402000">72402000 - Service Berkala AC Ducting Showroom</option>
+              <option value="72403000">72403000 - Servis & Sparepart Genset Cadangan</option>
+              <option value="72501000">72501000 - Lisensi Sistem SAP ECC & Database</option>
+              <option value="72502000">72502000 - Langganan Cloud SaaS, Zoom & Security</option>
+              <option value="72601000">72601000 - Jasa Security & Cleaning Service Cabang</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Cost Center & Nominal -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Cost Center (Pusat Biaya)</label>
+            <select id="fCostCenter" required class="w-full glass-input font-mono px-3 py-2.5 rounded-xl focus:outline-none">
+              <option value="CC-710 Showroom Sales">CC-710 Showroom & Sales Unit</option>
+              <option value="CC-720 General Admin" selected>CC-720 General Admin & Finance</option>
+              <option value="CC-730 Workshop Bengkel">CC-730 Workshop & Aftersales</option>
+              <option value="CC-740 Warehouse Gudang">CC-740 Warehouse & Logistik</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal (IDR)</label>
+            <input 
+              id="fNominal" 
+              type="number" 
+              required 
+              min="100" 
+              placeholder="Contoh: 3850000"
+              class="w-full glass-input font-mono px-3 py-2.5 rounded-xl focus:outline-none"
+            >
+          </div>
+        </div>
+
+        <!-- Tanggal & Sumber Pembayaran -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
+            <input 
+              id="fTanggal" 
+              type="date" 
+              required 
+              class="w-full glass-input px-3 py-2.5 rounded-xl focus:outline-none"
+            >
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Sumber Pembayaran</label>
+            <select id="fSumberDana" class="w-full glass-input px-3 py-2.5 rounded-xl focus:outline-none">
+              <option value="Petty Cash Ops">Petty Cash Operasional</option>
+              <option value="Bank BCA Ops">Rekening Giro Operasional BCA</option>
+              <option value="Bank Mandiri Ops">Rekening Giro Operasional Mandiri</option>
+              <option value="Corporate Card">Kartu Debit/Kredit Korporat</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Nomor Referensi / SPK -->
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Nota / SPK / PO</label>
+          <input 
+            id="fNoRef" 
+            type="text" 
+            placeholder="Cth: SO-EXP/26/001"
+            class="w-full glass-input font-mono px-3.5 py-2.5 rounded-xl focus:outline-none"
+          >
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeTransactionModal()" class="px-4 py-2 rounded-xl glass-panel font-semibold">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md shadow-blue-500/30">
+            Simpan Entri Beban
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- SLIDE-OVER DRAWER: PENGAJUAN AKUN BARU -->
+  <div id="proposalDrawerBackdrop" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm" onclick="closeProposalDrawer()"></div>
+  <div id="proposalDrawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md glass-panel p-6 shadow-2xl flex flex-col justify-between translate-x-full transition-transform duration-300">
+    <div class="space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Pengajuan Kode Akun COA Baru</h3>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Tata kelola leaf account standar Astra International</p>
+        </div>
+        <button onclick="closeProposalDrawer()" class="p-1 rounded-lg hover:bg-slate-500/10 text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="proposalForm" onsubmit="handleSaveProposal(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Usulan Nama Akun Baru</label>
+          <input id="pNamaAkun" type="text" required placeholder="Cth: Beban Lisensi Cybersecurity & Audit Endpoint" class="w-full glass-input px-3.5 py-2.5 rounded-xl focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Induk (Parent Category)</label>
+          <select id="pParentCat" required class="w-full glass-input px-3.5 py-2.5 rounded-xl focus:outline-none font-mono">
+            <option value="71000000">71000000 - Selling Expenses (SE)</option>
+            <option value="72000000" selected>72000000 - General & Administrative (G&A)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Justifikasi Kebutuhan Audit</label>
+          <textarea id="pJustifikasi" rows="3" required placeholder="Jelaskan mengapa transaksi ini tidak dapat dibukukan pada leaf account yang sudah ada..." class="w-full glass-input px-3.5 py-2.5 rounded-xl focus:outline-none"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md shadow-blue-500/30">
+          Kirimkan ke Antrean Otorisasi
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: KODE.GS SCRIPT VIEWER (Full Two-Way Sync Ready) -->
+  <div id="scriptModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div class="w-full max-w-2xl rounded-2xl glass-panel p-5 sm:p-6 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Kode Backend Google Apps Script (`kode.gs`)</h3>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Salin dan tempel ke Apps Script proyek Google Sheets Anda</p>
+        </div>
+        <button onclick="closeScriptModal()" class="p-1 rounded-lg hover:bg-slate-500/10 text-slate-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto bg-black/40 rounded-xl p-3.5 font-mono text-[11px] text-slate-300 select-all border border-white/10">
+        <pre id="gasSourceCode">/**
+ * ExpenseFlow Astra SO 2021 - Google Apps Script Backend (kode.gs)
+ * Aligned with COA Operating Expenses SO 2021 ASTRA
+ */
+const API_TOKEN = "astra-secret-token-2026"; // Sesuaikan dengan token di aplikasi frontend
+const SHEET_NAME = "OpexLedger_SO2021";
+
+function doPost(e) {
+  try {
+    const postData = JSON.parse(e.postData.contents);
+    if (postData.token !== API_TOKEN) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Unauthorized token" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      // Kolom Header sesuai database Astra SO 2021
+      sheet.appendRow([
+        "Timestamp",
+        "ID_Transaksi",
+        "Tanggal",
+        "No_Ref",
+        "Kode_COA",
+        "Nama_Akun",
+        "Kategori_COA",
+        "Cost_Center",
+        "Keterangan",
+        "Nominal",
+        "Sumber_Dana",
+        "Operator"
+      ]);
+    }
+    
+    if (postData.action === "ADD_TRANSACTION") {
+      const item = postData.payload;
+      sheet.appendRow([
+        new Date(),
+        item.id,
+        item.date,
+        item.ref,
+        item.coa,
+        item.coaName,
+        item.category,
+        item.costCenter || "CC-720 General Admin",
+        item.desc,
+        item.amount,
+        item.source,
+        item.operator || "Operator SO"
+      ]);
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "Tercatat di Sheet Astra SO" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  try {
+    const action = e.parameter.action;
+    
+    // Tarik seluruh baris data dari Google Sheet ke Frontend
+    if (action === "GET_TRANSACTIONS") {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "success", data: [] }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      const values = sheet.getDataRange().getValues();
+      if (values.length <= 1) {
+        return ContentService.createTextOutput(JSON.stringify({ status: "success", data: [] }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      const rows = [];
+      for (let i = 1; i < values.length; i++) {
+        const row = values[i];
+        if (row[1]) {
+          rows.push({
+            id: String(row[1]),
+            date: row[2] ? Utilities.formatDate(new Date(row[2]), "GMT+7", "yyyy-MM-dd") : "",
+            ref: String(row[3] || ""),
+            coa: String(row[4] || ""),
+            coaName: String(row[5] || ""),
+            category: String(row[6] || ""),
+            costCenter: String(row[7] || ""),
+            desc: String(row[8] || ""),
+            amount: Number(row[9] || 0),
+            source: String(row[10] || ""),
+            operator: String(row[11] || ""),
+            status: "POSTED"
+          });
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", data: rows }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "online", 
+      system: "ExpenseFlow Astra SO 2021 Backend",
+      version: "2.2-Astra"
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span class="text-[11px] text-slate-400">Pastikan Deploy: Web App &bull; Who has access: Anyone</span>
+        <button onclick="copyGasScript()" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold">
+          Salin Kode Script
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 pointer-events-none space-y-2"></div>
+
+  <script>
+    // --- STATE INITIALIZATION (Clean Slate: Ready for Database / Sheet) ---
+    let transactions = [];
+    let proposals = [];
+    let activeFilter = 'ALL';
+    let searchQuery = '';
+
+    // Smart Intent Keywords tailored to Astra SO 2021 operational expenses
+    const intentKeywords = [
+      { trigger: ['oli', 'genset', 'mesin', 'filter solar', 'generator'], coa: '72403000', name: '72403000 - Servis & Sparepart Genset Cadangan', score: '97%' },
+      { trigger: ['listrik', 'pln', 'token', 'gardu', 'kwh'], coa: '72301000', name: '72301000 - Listrik PLN Gardu Cabang & Showroom', score: '98%' },
+      { trigger: ['wifi', 'internet', 'fiber', 'indihome', 'biznet', 'vpn', 'bandwidth'], coa: '72303000', name: '72303000 - Internet Fiber Optic, Bandwidth & VPN', score: '95%' },
+      { trigger: ['ac', 'ducting', 'freon', 'cuci ac', 'dingin'], coa: '72402000', name: '72402000 - Service Berkala AC Ducting Showroom', score: '94%' },
+      { trigger: ['gedung', 'cat', 'lampu', 'plafon', 'pintu', 'renovasi'], coa: '72401000', name: '72401000 - Perawatan Gedung & Fasilitas Showroom', score: '93%' },
+      { trigger: ['pameran', 'mall', 'booth', 'event', 'display', 'auto fest'], coa: '71201000', name: '71201000 - Pameran, Mall Exhibition & Event Display', score: '96%' },
+      { trigger: ['iklan', 'billboard', 'spanduk', 'banner', 'ads'], coa: '71202000', name: '71202000 - Iklan Media Digital, Cetak & Billboard', score: '92%' },
+      { trigger: ['brosur', 'flyer', 'merchandise', 'souvenir', 'goodie bag'], coa: '71203000', name: '71203000 - Brosur, Flyer, Merchandise & Souvenir SPK', score: '94%' },
+      { trigger: ['bbm', 'bensin', 'pertamax', 'tol', 'solar', 'parkir', 'test drive'], coa: '71301000', name: '71301000 - BBM, Tol & Parkir Armada Test Drive Sales', score: '97%' },
+      { trigger: ['carrier', 'towing', 'ekspedisi', 'ongkir', 'kirim unit', 'storing'], coa: '71101000', name: '71101000 - Ekspedisi & Car Carrier Pengiriman Unit', score: '95%' },
+      { trigger: ['atk', 'kertas', 'pulpen', 'form spk', 'tinta'], coa: '72201000', name: '72201000 - Alat Tulis Kantor (ATK) & Form SPK', score: '94%' },
+      { trigger: ['sap', 'erp', 'ecc', 'oracle', 'database', 'license'], coa: '72501000', name: '72501000 - Lisensi Sistem SAP ECC & Database', score: '98%' },
+      { trigger: ['security', 'satpam', 'cleaning', 'kebersihan', 'ob'], coa: '72601000', name: '72601000 - Jasa Security & Cleaning Service Cabang', score: '93%' }
+    ];
+
+    let pendingSuggestion = null;
+
+    // Standard COA Master Structure according to COA_Operating_Expenses_SO_2021_ASTRA
+    const astraCoaDatabase = [
+      {
+        groupCode: '71000000',
+        groupName: 'SELLING EXPENSES (SE) - BEBAN PENJUALAN',
+        color: 'indigo',
+        subgroups: [
+          {
+            code: '71100000',
+            name: 'Biaya Pengiriman & Logistik Unit',
+            accounts: [
+              { code: '71101000', name: 'Ekspedisi & Car Carrier Pengiriman Unit', cc: 'CC-740 Warehouse' },
+              { code: '71102000', name: 'Jasa Towing & Storing Kendaraan', cc: 'CC-710 Showroom' }
+            ]
+          },
+          {
+            code: '71200000',
+            name: 'Promosi, Iklan & Event Display',
+            accounts: [
+              { code: '71201000', name: 'Pameran, Mall Exhibition & Event Display', cc: 'CC-710 Showroom' },
+              { code: '71202000', name: 'Iklan Media Digital, Cetak & Billboard', cc: 'CC-710 Showroom' },
+              { code: '71203000', name: 'Brosur, Flyer, Merchandise & Souvenir SPK', cc: 'CC-710 Showroom' }
+            ]
+          },
+          {
+            code: '71300000',
+            name: 'Beban Armada & Sales Lapangan',
+            accounts: [
+              { code: '71301000', name: 'BBM, Tol & Parkir Armada Test Drive Sales', cc: 'CC-710 Showroom' },
+              { code: '71302000', name: 'Service & Pemeliharaan Mobil Sales', cc: 'CC-730 Workshop' }
+            ]
+          },
+          {
+            code: '71400000',
+            name: 'Komisi & Insentif Tenaga Penjual',
+            accounts: [
+              { code: '71401000', name: 'Insentif Pencapaian Target Sales Force', cc: 'CC-710 Showroom' }
+            ]
+          }
+        ]
+      },
+      {
+        groupCode: '72000000',
+        groupName: 'GENERAL & ADMINISTRATIVE (G&A) - BEBAN UMUM & ADMINISTRASI',
+        color: 'blue',
+        subgroups: [
+          {
+            code: '72100000',
+            name: 'Beban Ketenagakerjaan & Personalia',
+            accounts: [
+              { code: '72101000', name: 'Gaji Pokok, Tunjangan & Lembur Staf', cc: 'CC-720 GA' },
+              { code: '72102000', name: 'BPJS Ketenagakerjaan & Kesehatan SO', cc: 'CC-720 GA' },
+              { code: '72103000', name: 'Konsumsi Lembur & Kesejahteraan Karyawan', cc: 'CC-720 GA' }
+            ]
+          },
+          {
+            code: '72200000',
+            name: 'Perlengkapan & Cetakan Kantor',
+            accounts: [
+              { code: '72201000', name: 'Alat Tulis Kantor (ATK) & Form SPK', cc: 'CC-720 GA' },
+              { code: '72202000', name: 'Fotokopi & Penggandaan Dokumen', cc: 'CC-720 GA' }
+            ]
+          },
+          {
+            code: '72300000',
+            name: 'Beban Utilitas & Komunikasi',
+            accounts: [
+              { code: '72301000', name: 'Listrik PLN Gardu Cabang & Showroom', cc: 'CC-720 GA' },
+              { code: '72302000', name: 'Air Bersih PDAM & Air Minum Galon', cc: 'CC-720 GA' },
+              { code: '72303000', name: 'Internet Fiber Optic, Bandwidth & VPN', cc: 'CC-720 GA' }
+            ]
+          },
+          {
+            code: '72400000',
+            name: 'Pemeliharaan Gedung & Fasilitas',
+            accounts: [
+              { code: '72401000', name: 'Perawatan Gedung & Fasilitas Showroom', cc: 'CC-710 Showroom' },
+              { code: '72402000', name: 'Service Berkala AC Ducting Showroom', cc: 'CC-710 Showroom' },
+              { code: '72403000', name: 'Servis & Sparepart Genset Cadangan', cc: 'CC-720 GA' }
+            ]
+          },
+          {
+            code: '72500000',
+            name: 'IT, Software License & Cloud',
+            accounts: [
+              { code: '72501000', name: 'Lisensi Sistem SAP ECC & Database', cc: 'CC-720 GA' },
+              { code: '72502000', name: 'Langganan Cloud SaaS, Zoom & Security', cc: 'CC-720 GA' }
+            ]
+          },
+          {
+            code: '72600000',
+            name: 'Jasa Outsourcing & Profesional',
+            accounts: [
+              { code: '72601000', name: 'Jasa Security & Cleaning Service Cabang', cc: 'CC-720 GA' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // --- DOM INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('fTanggal').value = new Date().toISOString().split('T')[0];
+      
+      // Load saved configurations
+      const savedGas = localStorage.getItem('EF_GAS_URL');
+      const savedToken = localStorage.getItem('EF_API_TOKEN');
+      if (savedGas) document.getElementById('cfgGasUrl').value = savedGas;
+      if (savedToken) document.getElementById('cfgApiToken').value = savedToken;
+
+      // Load cached local records if available
+      try {
+        const cachedTx = localStorage.getItem('EF_TRANSACTIONS');
+        if (cachedTx) transactions = JSON.parse(cachedTx);
+
+        const cachedProposals = localStorage.getItem('EF_PROPOSALS');
+        if (cachedProposals) proposals = JSON.parse(cachedProposals);
+      } catch (e) {
+        console.warn('Cache error:', e);
+      }
+
+      renderDashboard();
+      renderCoaTree();
+      renderApprovalQueue();
+      initTheme();
+
+      // If GAS is already configured, auto-fetch live data from Google Sheets
+      if (savedGas) {
+        fetchFromGoogleSheets(false);
+      }
+    });
+
+    // --- VIEW SWITCHER ---
+    function switchView(viewKey) {
+      const views = ['dashboard', 'coa', 'approvals', 'account'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+        
+        const navEl = document.getElementById(`nav-${v}`);
+        if (navEl) {
+          navEl.classList.remove('bg-blue-600/10', 'text-blue-600', 'dark:text-blue-400', 'border-blue-500/20');
+          navEl.classList.add('text-slate-600', 'dark:text-slate-400');
+        }
+
+        const mobEl = document.getElementById(`mobile-nav-${v}`);
+        if (mobEl) {
+          mobEl.classList.remove('text-blue-600', 'dark:text-blue-400');
+          mobEl.classList.add('text-slate-500', 'dark:text-slate-400');
+        }
+      });
+
+      const activeEl = document.getElementById(`view-${viewKey}`);
+      if (activeEl) activeEl.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${viewKey}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-blue-600/10', 'text-blue-600', 'dark:text-blue-400', 'border-blue-500/20');
+        activeNav.classList.remove('text-slate-600', 'dark:text-slate-400');
+      }
+
+      const activeMob = document.getElementById(`mobile-nav-${viewKey}`);
+      if (activeMob) {
+        activeMob.classList.add('text-blue-600', 'dark:text-blue-400');
+        activeMob.classList.remove('text-slate-500', 'dark:text-slate-400');
+      }
+
+      const titleEl = document.getElementById('pageTitle');
+      const subEl = document.getElementById('pageSubtitle');
+      if (viewKey === 'dashboard') {
+        titleEl.textContent = 'Buku Beban Operasional';
+        subEl.textContent = 'Astra Sales Operation (SO 2021) • Selling & G&A';
+      } else if (viewKey === 'coa') {
+        titleEl.textContent = 'Kamus Akun COA Astra';
+        subEl.textContent = 'Hierarki Akun Standar SAP ECC 8-Digit SO 2021';
+      } else if (viewKey === 'approvals') {
+        titleEl.textContent = 'Persetujuan Kode Akun';
+        subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
+      } else if (viewKey === 'account') {
+        titleEl.textContent = 'API & Integrasi Cloud';
+        subEl.textContent = 'Konfigurasi Google Apps Script & Parameter SO';
+      }
+
+      document.getElementById('workspaceScrollContainer').scrollTop = 0;
+    }
+
+    // --- SMART INTENT MATCHER ---
+    function triggerSmartIntent(text) {
+      const q = text.toLowerCase();
+      const card = document.getElementById('smartSuggestionCard');
+      
+      let matched = null;
+      for (const item of intentKeywords) {
+        if (item.trigger.some(k => q.includes(k))) {
+          matched = item;
+          break;
+        }
+      }
+
+      if (matched && q.length > 2) {
+        pendingSuggestion = matched;
+        document.getElementById('suggestedAccountName').textContent = matched.name;
+        document.getElementById('suggestedMatchScore').textContent = matched.score;
+        card.classList.remove('hidden');
+      } else {
+        pendingSuggestion = null;
+        card.classList.add('hidden');
+      }
+    }
+
+    function applySuggestedAccount() {
+      if (pendingSuggestion) {
+        document.getElementById('fAkunCoa').value = pendingSuggestion.coa;
+        document.getElementById('smartSuggestionCard').classList.add('hidden');
+        showToast(`Akun terpilih: ${pendingSuggestion.name}`, 'info');
+      }
+    }
+
+    // --- DASHBOARD RENDERER ---
+    function renderDashboard() {
+      const filtered = transactions.filter(item => {
+        const matchesFilter = activeFilter === 'ALL' || item.category === activeFilter;
+        const matchesSearch = searchQuery === '' || 
+          (item.desc && item.desc.toLowerCase().includes(searchQuery)) ||
+          (item.ref && item.ref.toLowerCase().includes(searchQuery)) ||
+          (item.coa && item.coa.includes(searchQuery)) ||
+          (item.costCenter && item.costCenter.toLowerCase().includes(searchQuery)) ||
+          (item.coaName && item.coaName.toLowerCase().includes(searchQuery));
+        return matchesFilter && matchesSearch;
+      });
+
+      // Update KPI
+      const totalAmount = transactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      const seAmount = transactions.filter(t => t.category === '7100').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+      const gaAmount = transactions.filter(t => t.category !== '7100').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+
+      document.getElementById('kpiTotalOpex').textContent = formatNumber(totalAmount);
+      document.getElementById('kpiSeTotal').textContent = 'Rp ' + formatNumber(seAmount);
+      document.getElementById('kpiGaTotal').textContent = 'Rp ' + formatNumber(gaAmount);
+      document.getElementById('kpiTotalEntries').textContent = transactions.length;
+
+      // Calculate progress percentages
+      const budgetCap = 85000000;
+      const burnPct = Math.min(100, ((totalAmount / budgetCap) * 100)).toFixed(1);
+      document.getElementById('kpiBurnPercent').textContent = `${burnPct}%`;
+      document.getElementById('kpiProgressBar').style.width = `${burnPct}%`;
+
+      const totalSplit = (seAmount + gaAmount) || 1;
+      const sePct = Math.round((seAmount / totalSplit) * 100);
+      const gaPct = Math.round((gaAmount / totalSplit) * 100);
+      document.getElementById('kpiSeBar').style.width = totalAmount > 0 ? `${sePct}%` : '0%';
+      document.getElementById('kpiGaBar').style.width = totalAmount > 0 ? `${gaPct}%` : '0%';
+
+      // Update Pending COA Count
+      const pendingCount = proposals.filter(p => p.status === 'PENDING').length;
+      const pendingBadge = document.getElementById('kpiPendingBadge');
+      if (pendingCount > 0) {
+        pendingBadge.className = 'text-xs font-mono font-bold text-amber-500 flex items-center gap-1';
+        pendingBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> ${pendingCount} Pending COA`;
+      } else {
+        pendingBadge.className = 'text-xs font-mono font-bold text-slate-400 flex items-center gap-1';
+        pendingBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 0 Pending COA`;
+      }
+
+      // Render Desktop Table (Clean Zero-State when empty)
+      const tbody = document.getElementById('desktopTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-12 text-center">
+              <div class="max-w-xs mx-auto space-y-2">
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <h4 class="font-bold text-xs text-slate-700 dark:text-slate-200">Belum Ada Transaksi Beban</h4>
+                <p class="text-[11px] text-slate-400">Klik "Catat Beban" atau sinkronkan data dari spreadsheet Google Sheets.</p>
+                <div class="pt-2 flex justify-center gap-2">
+                  <button onclick="openTransactionModal()" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm">
+                    + Catat Beban Baru
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = filtered.map(t => `
+          <tr class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+            <td class="py-3 px-4">
+              <span class="font-mono text-slate-800 dark:text-slate-200 font-semibold">${t.date || '-'}</span>
+              <p class="text-[10px] text-slate-400 font-mono mt-0.5">${t.ref || '-'}</p>
+            </td>
+            <td class="py-3 px-4">
+              <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">${t.coa}</span>
+              <p class="text-[11px] text-slate-700 dark:text-slate-300 font-medium">${t.coaName}</p>
+            </td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-500/10 text-slate-600 dark:text-slate-300 font-medium border border-slate-500/20 whitespace-nowrap">
+                ${t.costCenter || 'CC-720 General Admin'}
+              </span>
+            </td>
+            <td class="py-3 px-4 max-w-xs truncate text-slate-800 dark:text-slate-200">
+              ${t.desc}
+            </td>
+            <td class="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+              ${t.source || 'Petty Cash'}
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 dark:text-white">
+              Rp ${formatNumber(t.amount)}
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                POSTED
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render Mobile Cards (Clean Zero-State when empty)
+      const mobContainer = document.getElementById('mobileCardsContainer');
+      if (filtered.length === 0) {
+        mobContainer.innerHTML = `
+          <div class="p-8 text-center glass-panel rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100">Belum Ada Transaksi</h4>
+            <p class="text-[11px] text-slate-400">Tekan tombol bulat (+) di bawah untuk mencatat transaksi beban.</p>
+          </div>
+        `;
+      } else {
+        mobContainer.innerHTML = filtered.map(t => `
+          <div class="p-4 rounded-2xl glass-panel space-y-2.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-mono text-blue-600 dark:text-blue-400 font-bold">${t.coa}</span>
+              <span class="font-mono text-slate-400 text-[10px]">${t.date || '-'} &bull; ${t.ref || '-'}</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-900 dark:text-white">${t.coaName}</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">${t.desc}</p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-white/10 text-xs">
+              <span class="text-slate-400 text-[11px] font-mono">${t.costCenter || 'CC-720 GA'} &bull; ${t.source || 'Ops'}</span>
+              <span class="font-mono font-bold text-sm text-slate-900 dark:text-white">Rp ${formatNumber(t.amount)}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const filteredTotal = filtered.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      document.getElementById('tableSummaryCount').textContent = `Menampilkan ${filtered.length} transaksi`;
+      document.getElementById('tableSummaryTotal').textContent = `Rp ${formatNumber(filteredTotal)}`;
+    }
+
+    // --- SEARCH & FILTER ---
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderDashboard();
+    }
+
+    function setFilter(cat, btn) {
+      activeFilter = cat;
+      document.querySelectorAll('.filter-pill').forEach(b => {
+        b.classList.remove('bg-blue-600', 'text-white');
+        b.classList.add('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+      });
+      btn.classList.add('bg-blue-600', 'text-white');
+      btn.classList.remove('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+      renderDashboard();
+    }
+
+    // --- TRANSACTION MODAL & SAVING ---
+    function openTransactionModal() {
+      document.getElementById('transactionModal').classList.remove('hidden');
+      document.getElementById('fKeterangan').focus();
+    }
+
+    function closeTransactionModal() {
+      document.getElementById('transactionModal').classList.add('hidden');
+      document.getElementById('smartSuggestionCard').classList.add('hidden');
+    }
+
+    function handleSaveExpense(e) {
+      e.preventDefault();
+      const coaSelect = document.getElementById('fAkunCoa');
+      const coaCode = coaSelect.value;
+      const coaText = coaSelect.options[coaSelect.selectedIndex].text.split(' - ')[1] || 'Beban Operasional';
+      const costCenter = document.getElementById('fCostCenter').value;
+      const amount = parseInt(document.getElementById('fNominal').value, 10);
+      const desc = document.getElementById('fKeterangan').value;
+      const date = document.getElementById('fTanggal').value;
+      const source = document.getElementById('fSumberDana').value;
+      const ref = document.getElementById('fNoRef').value || `SO-EXP/26/${Math.floor(100 + Math.random() * 900)}`;
+
+      const newTx = {
+        id: `TX-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        date,
+        ref,
+        coa: coaCode,
+        coaName: coaText,
+        category: coaCode.startsWith('71') ? '7100' : coaCode.substring(0, 4),
+        costCenter,
+        desc,
+        amount,
+        source,
+        status: 'POSTED'
+      };
+
+      transactions.unshift(newTx);
+      try {
+        localStorage.setItem('EF_TRANSACTIONS', JSON.stringify(transactions));
+      } catch (err) {}
+
+      renderDashboard();
+      closeTransactionModal();
+      document.getElementById('expenseForm').reset();
+      document.getElementById('fTanggal').value = new Date().toISOString().split('T')[0];
+      showToast('Transaksi berhasil dicatat dan disimpan!', 'success');
+
+      // Sync if GAS URL is configured
+      syncToGoogleSheets(newTx);
+    }
+
+    // --- PROPOSAL DRAWER ---
+    function openProposalDrawer() {
+      document.getElementById('proposalDrawerBackdrop').classList.remove('hidden');
+      document.getElementById('proposalDrawer').classList.remove('translate-x-full');
+    }
+
+    function closeProposalDrawer() {
+      document.getElementById('proposalDrawerBackdrop').classList.add('hidden');
+      document.getElementById('proposalDrawer').classList.add('translate-x-full');
+    }
+
+    function handleSaveProposal(e) {
+      e.preventDefault();
+      const name = document.getElementById('pNamaAkun').value.trim();
+      const parent = document.getElementById('pParentCat').value;
+      const justification = document.getElementById('pJustifikasi').value.trim();
+
+      const newProposal = {
+        id: `PROP-${Date.now()}`,
+        name,
+        parent,
+        justification,
+        date: new Date().toISOString().split('T')[0],
+        status: 'PENDING'
+      };
+
+      proposals.unshift(newProposal);
+      try {
+        localStorage.setItem('EF_PROPOSALS', JSON.stringify(proposals));
+      } catch (err) {}
+
+      closeProposalDrawer();
+      document.getElementById('proposalForm').reset();
+      renderApprovalQueue();
+      renderDashboard();
+      showToast(`Pengajuan akun "${name}" berhasil dikirim ke antrean.`, 'success');
+    }
+
+    // --- COA TREE RENDERER (Full Astra SO 2021) ---
+    function renderCoaTree(filterKeyword = '') {
+      const coaContainer = document.getElementById('coaTreeContainer');
+      const kw = filterKeyword.toLowerCase().trim();
+
+      const html = astraCoaDatabase.map(group => {
+        const filteredSubgroups = group.subgroups.map(sg => {
+          const matchedAccounts = sg.accounts.filter(a => 
+            kw === '' || a.code.includes(kw) || a.name.toLowerCase().includes(kw) || a.cc.toLowerCase().includes(kw)
+          );
+          return { ...sg, accounts: matchedAccounts };
+        }).filter(sg => sg.accounts.length > 0 || (kw !== '' && sg.name.toLowerCase().includes(kw)));
+
+        if (filteredSubgroups.length === 0 && kw !== '' && !group.groupName.toLowerCase().includes(kw) && !group.groupCode.includes(kw)) {
+          return '';
+        }
+
+        const subgroupsToRender = filteredSubgroups.length > 0 ? filteredSubgroups : group.subgroups;
+
+        return `
+          <div class="p-5 rounded-2xl glass-panel space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
+              <div class="flex items-center gap-2 font-mono font-bold text-xs ${group.color === 'indigo' ? 'text-indigo-600 dark:text-indigo-400' : 'text-blue-600 dark:text-blue-400'}">
+                <span class="w-2.5 h-2.5 rounded-full ${group.color === 'indigo' ? 'bg-indigo-500' : 'bg-blue-500'}"></span>
+                <span>${group.groupCode} &bull; ${group.groupName}</span>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400">Header Level 1</span>
+            </div>
+
+            <div class="space-y-4">
+              ${subgroupsToRender.map(sg => `
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    <span class="font-mono text-slate-500 dark:text-slate-400 text-[11px]">${sg.code}</span>
+                    <span class="flex-1 ml-2">${sg.name}</span>
+                  </div>
+                  <div class="pl-4 border-l-2 ${group.color === 'indigo' ? 'border-indigo-500/30' : 'border-blue-500/30'} space-y-1.5 text-xs font-mono">
+                    ${sg.accounts.map(acc => `
+                      <div class="flex items-center justify-between py-1 border-b border-slate-200/40 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 px-2 rounded-lg transition-colors">
+                        <div class="flex items-center gap-2">
+                          <span class="text-blue-600 dark:text-blue-400 font-bold">${acc.code}</span>
+                          <span class="font-sans text-slate-700 dark:text-slate-300">${acc.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-500 dark:text-slate-400">${acc.cc}</span>
+                          <span class="text-[10px] text-emerald-500 font-bold">Posting Leaf</span>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).filter(Boolean).join('');
+
+      coaContainer.innerHTML = html || `<div class="p-8 text-center text-xs text-slate-400 glass-panel rounded-2xl">Tidak ada kode akun COA yang cocok dengan kata kunci "${filterKeyword}"</div>`;
+    }
+
+    function filterCoaTree(val) {
+      renderCoaTree(val);
+    }
+
+    // --- APPROVAL QUEUE RENDERER ---
+    function renderApprovalQueue() {
+      const container = document.getElementById('approvalQueueContainer');
+      const pendingProposals = proposals.filter(p => p.status === 'PENDING');
+      
+      const badgeDesk = document.getElementById('badgeDesktopApprovals');
+      const dotMob = document.getElementById('mobileBadgeDot');
+      
+      badgeDesk.textContent = pendingProposals.length;
+      if (pendingProposals.length > 0) {
+        badgeDesk.className = 'px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400';
+        dotMob.classList.remove('hidden');
+      } else {
+        badgeDesk.className = 'px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-slate-500/15 text-slate-500 dark:text-slate-400';
+        dotMob.classList.add('hidden');
+      }
+
+      if (pendingProposals.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center glass-panel rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100">Semua Kode Akun Terotorisasi</h4>
+            <p class="text-[11px] text-slate-400">Tidak ada pengajuan akun baru yang tertunda dalam antrean saat ini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = pendingProposals.map(item => `
+        <div class="p-4 rounded-2xl glass-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/10 text-amber-500 font-bold">PENDING APPROVAL</span>
+              <span class="font-mono text-xs text-slate-400">Diajukan: ${item.date}</span>
+            </div>
+            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mt-1">${item.name}</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Parent: ${item.parent} &bull; Justifikasi: ${item.justification}</p>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <button onclick="approveProposal('${item.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-sm">
+              Setujui Akun
+            </button>
+            <button onclick="rejectProposal('${item.id}')" class="px-3 py-1.5 rounded-xl glass-panel text-rose-500 hover:bg-rose-500/10 font-semibold text-xs">
+              Tolak
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function approveProposal(id) {
+      proposals = proposals.map(p => p.id === id ? { ...p, status: 'APPROVED' } : p);
+      try { localStorage.setItem('EF_PROPOSALS', JSON.stringify(proposals)); } catch (e) {}
+      renderApprovalQueue();
+      renderDashboard();
+      showToast('Akun berhasil diotorisasi dan disetujui!', 'success');
+    }
+
+    function rejectProposal(id) {
+      proposals = proposals.filter(p => p.id !== id);
+      try { localStorage.setItem('EF_PROPOSALS', JSON.stringify(proposals)); } catch (e) {}
+      renderApprovalQueue();
+      renderDashboard();
+      showToast('Pengajuan akun telah ditolak.', 'info');
+    }
+
+    // --- SCRIPT MODAL & GOOGLE APPS SCRIPT ---
+    function openScriptModal() {
+      document.getElementById('scriptModal').classList.remove('hidden');
+    }
+
+    function closeScriptModal() {
+      document.getElementById('scriptModal').classList.add('hidden');
+    }
+
+    function copyGasScript() {
+      const code = document.getElementById('gasSourceCode').innerText;
+      const ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Kode kode.gs disalin ke clipboard!', 'success');
+    }
+
+    function saveGasConfig() {
+      const url = document.getElementById('cfgGasUrl').value.trim();
+      const token = document.getElementById('cfgApiToken').value.trim();
+      localStorage.setItem('EF_GAS_URL', url);
+      localStorage.setItem('EF_API_TOKEN', token);
+      showToast('Konfigurasi API Google Sheets disimpan!', 'success');
+      if (url) {
+        fetchFromGoogleSheets(true);
+      }
+    }
+
+    async function testGasConnection() {
+      const url = document.getElementById('cfgGasUrl').value.trim();
+      if (!url) {
+        showToast('Masukkan URL Apps Script terlebih dahulu', 'error');
+        return;
+      }
+      showToast('Menguji koneksi ke Google Apps Script...', 'info');
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.status === 'online') {
+          showToast(`Koneksi Sukses! Backend Astra SO online (v${data.version || '2.2'}).`, 'success');
+          document.getElementById('sidebarSyncDot').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+        } else {
+          showToast('Backend merespons namun format berbeda.', 'info');
+        }
+      } catch (err) {
+        showToast('Koneksi gagal. Pastikan deploy Web App: Anyone.', 'error');
+      }
+    }
+
+    async function fetchFromGoogleSheets(showNotification = true) {
+      const url = localStorage.getItem('EF_GAS_URL');
+      if (!url) return;
+
+      const syncIcon = document.getElementById('syncIconSvg');
+      const statusLabel = document.getElementById('syncStatusLabel');
+      if (syncIcon) syncIcon.classList.add('animate-spin', 'text-blue-500');
+      if (statusLabel) statusLabel.textContent = 'Menyinkronkan...';
+
+      try {
+        const fetchUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_TRANSACTIONS';
+        const res = await fetch(fetchUrl);
+        const json = await res.json();
+
+        if (json.status === 'success' && Array.isArray(json.data)) {
+          transactions = json.data;
+          try {
+            localStorage.setItem('EF_TRANSACTIONS', JSON.stringify(transactions));
+          } catch (e) {}
+
+          renderDashboard();
+          document.getElementById('sidebarSyncDot').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+          if (statusLabel) statusLabel.textContent = 'Tersinkron';
+          if (showNotification) {
+            showToast(`Berhasil memuat ${transactions.length} transaksi dari Google Sheets!`, 'success');
+          }
+        }
+      } catch (err) {
+        console.warn('Sync read error:', err);
+        if (statusLabel) statusLabel.textContent = 'Tersimpan Lokal';
+        if (showNotification) {
+          showToast('Gagal menarik dari Google Sheets. Data lokal ditampilkan.', 'info');
+        }
+      } finally {
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
+      }
+    }
+
+    async function syncToGoogleSheets(item) {
+      const url = localStorage.getItem('EF_GAS_URL');
+      const token = localStorage.getItem('EF_API_TOKEN');
+      if (!url) return;
+
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            token,
+            action: 'ADD_TRANSACTION',
+            payload: item
+          })
+        });
+        showToast('Tercatat di Google Sheets Astra SO!', 'success');
+        document.getElementById('sidebarSyncDot').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+      } catch (e) {
+        console.warn('Sync background pending:', e);
+      }
+    }
+
+    function triggerManualSync() {
+      const url = localStorage.getItem('EF_GAS_URL');
+      if (!url) {
+        showToast('URL Google Apps Script belum diisi di menu Akun & API', 'info');
+        switchView('account');
+        return;
+      }
+      fetchFromGoogleSheets(true);
+    }
+
+    // --- EXPORT TO CSV ---
+    function exportToCsv() {
+      if (transactions.length === 0) {
+        showToast('Tidak ada transaksi untuk diekspor', 'info');
+        return;
+      }
+      let csv = 'ID_Transaksi,Tanggal,No_Ref,Kode_COA,Nama_Akun,Cost_Center,Keterangan,Nominal,Sumber_Dana,Status\n';
+      transactions.forEach(t => {
+        csv += `"${t.id || ''}","${t.date || ''}","${t.ref || ''}","${t.coa || ''}","${(t.coaName || '').replace(/"/g, '""')}","${t.costCenter || 'CC-720 GA'}","${(t.desc || '').replace(/"/g, '""')}","${t.amount || 0}","${t.source || ''}","${t.status || 'POSTED'}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ExpenseFlow_AstraSO_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('File CSV berhasil diunduh', 'success');
+    }
+
+    // --- THEME TOGGLE (Dark / Light Glass) ---
+    function initTheme() {
+      const isLight = localStorage.getItem('EF_THEME') === 'light';
+      if (isLight) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('EF_THEME', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('EF_THEME', 'dark');
+      }
+    }
+
+    // --- TOAST NOTIFICATIONS ---
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'border-emerald-500/40 text-emerald-400 bg-emerald-950/80',
+        error: 'border-rose-500/40 text-rose-400 bg-rose-950/80',
+        info: 'border-blue-500/40 text-blue-400 bg-blue-950/80'
+      };
+
+      toast.className = `p-3 rounded-xl glass-panel border ${colors[type] || colors.info} text-xs font-semibold shadow-2xl flex items-center gap-2 transition-all transform duration-300 opacity-0 translate-y-2 pointer-events-auto`;
+      toast.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        <span>${msg}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function formatNumber(num) {
+      return new Intl.NumberFormat('id-ID').format(num || 0);
+    }
+  </script>
+</body>
+</html>
