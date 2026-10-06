@@ -1,256 +1,333 @@
 /**
  * js/data/coa-data.js
  * Chart of Accounts (COA) Master Data & Smart Intent Matcher Triggers
- * Based on: COA Operating Expenses SO 2021 ASTRA International
+ * Sesuai Persis dengan Database: COA_Operating_Expenses_SO_2021_ASTRA (Sheet: COA OPEX 2021 Presisi Full)
  */
 
-// Standard COA Master Structure according to COA_Operating_Expenses_SO_2021_ASTRA
+// Master Database COA Astra SO 2021 (Format Baku: XXX.XX.XX.XXX)
 const astraCoaDatabase = [
   {
-    groupCode: '71000000',
-    groupName: 'SELLING EXPENSES (SE) - BEBAN PENJUALAN',
-    color: 'indigo',
+    groupCode: '700',
+    groupName: 'EMPLOYEE COMPENSATION',
+    color: 'emerald',
     subgroups: [
       {
-        code: '71100000',
-        name: 'Biaya Pengiriman & Logistik Unit',
+        code: '700.01.00.000',
+        name: 'Salaries',
         accounts: [
-          { 
-            code: '71101000', 
-            name: 'Ekspedisi & Car Carrier Pengiriman Unit', 
-            cc: 'CC-740 Warehouse',
-            tax: 'PPh 23 (2%)',
-            detail: 'Biaya jasa ekspedisi pihak ketiga atau car carrier pengiriman unit mobil/motor dari logistik pusat ke cabang atau antar cabang.',
-            example: 'Jasa car carrier pengiriman 5 unit Avanza dari Pool Sunter ke Cabang'
-          },
-          { 
-            code: '71102000', 
-            name: 'Jasa Towing & Storing Kendaraan', 
-            cc: 'CC-710 Showroom',
-            tax: 'PPh 23 (2%)',
-            detail: 'Biaya mobil derek (towing) unit mogok, evakuasi storing, atau pengantaran khusus langsung ke alamat konsumen.',
-            example: 'Jasa derek towing storing darurat unit customer dari tol ke bengkel cabang'
+          {
+            code: '700.01.00.000',
+            name: 'Salaries',
+            cc: '[Otomatis dari sistem SAP-HR]',
+            tax: 'Bukan Obyek PPh',
+            detail: 'Gaji pokok yang dibayarkan kepada karyawan perusahaan.',
+            example: 'Pembayaran gaji pokok bulanan staf dan wiraniaga cabang'
           }
         ]
       },
       {
-        code: '71200000',
-        name: 'Promosi, Iklan & Event Display',
+        code: '700.02.00.000',
+        name: 'Allowance',
         accounts: [
-          { 
-            code: '71201000', 
-            name: 'Pameran, Mall Exhibition & Event Display', 
-            cc: 'CC-710 Showroom',
-            tax: 'PPh 4(2) / PPh 23',
-            detail: 'Sewa space booth mall, dekorasi pameran, backdrop event display, dan partisipasi Astra Auto Fest.',
-            example: 'Sewa atrium mall pameran weekend exhibition & dekorasi booth SPK'
+          {
+            code: '700.02.01.000',
+            name: 'Placement',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan penempatan kerja karyawan di cabang/lokasi operasional.',
+            example: 'Tunjangan penempatan staf mutasi cabang baru'
           },
-          { 
-            code: '71202000', 
-            name: 'Iklan Media Digital, Cetak & Billboard', 
-            cc: 'CC-710 Showroom',
-            tax: 'PPh 23 (2%)',
-            detail: 'Biaya penayangan iklan Meta/Google Ads, billboard reklame jalan raya, koran lokal, dan spanduk promosi cabang.',
-            example: 'Pasang banner promosi diskon akhir tahun & iklan berbayar Facebook Ads'
+          {
+            code: '700.02.02.000',
+            name: 'Operational',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan yang diberikan kepada salesman untuk keperluan operasional harian.',
+            example: 'Tunjangan operasional lapangan wiraniaga showroom'
           },
-          { 
-            code: '71203000', 
-            name: 'Brosur, Flyer, Merchandise & Souvenir SPK', 
-            cc: 'CC-710 Showroom',
-            tax: 'Non-Objek PPh / PPN',
-            detail: 'Pencetakan brosur spesifikasi unit, flyer sales, merchandise souvenir hadiah SPK (payung, gantungan kunci, pouch).',
-            example: 'Cetak 2.000 lembar brosur spesifikasi unit baru & souvenir payung SPK konsumen'
-          }
-        ]
-      },
-      {
-        code: '71300000',
-        name: 'Beban Armada & Sales Lapangan',
-        accounts: [
-          { 
-            code: '71301000', 
-            name: 'BBM, Tol & Parkir Armada Test Drive Sales', 
-            cc: 'CC-710 Showroom',
-            tax: 'Non-Objek PPh',
-            detail: 'Pembelian bensin (Pertamax/Solar), pengisian saldo e-toll, dan karcis parkir untuk operasional unit test drive calon pembeli.',
-            example: 'Reimburse bensin Pertamax & top-up saldo e-toll armada test drive customer'
+          {
+            code: '700.02.03.000',
+            name: 'Transportation',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan transportasi rutin karyawan.',
+            example: 'Tunjangan transport bulanan staf administrasi & sales'
           },
-          { 
-            code: '71302000', 
-            name: 'Service & Pemeliharaan Mobil Sales', 
-            cc: 'CC-730 Workshop',
-            tax: 'PPh 23 (Jasa)',
-            detail: 'Perawatan berkala, ganti oli mesin, salon mobil display, dan cuci mobil armada sales & unit display showroom.',
-            example: 'Cuci mobil rutin armada showroom & service ganti oli mobil operasional sales'
-          }
-        ]
-      },
-      {
-        code: '71400000',
-        name: 'Komisi & Insentif Tenaga Penjual',
-        accounts: [
-          { 
-            code: '71401000', 
-            name: 'Insentif Pencapaian Target Sales Force', 
-            cc: 'CC-710 Showroom',
-            tax: 'PPh 21',
-            detail: 'Insentif pencapaian target volume penjualan bulanan (SPK/DO) wiraniaga dan supervisor penjualan.',
-            example: 'Bonus insentif penjualan pencapaian target 15 DO sales executive bulan ini'
+          {
+            code: '700.02.04.000',
+            name: 'Driver',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan supir / pengemudi operasional cabang.',
+            example: 'Tunjangan pengemudi pool kendaraan operasional cabang'
+          },
+          {
+            code: '700.02.05.000',
+            name: 'Meal',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan uang makan staf dan karyawan cabang.',
+            example: 'Uang makan harian staf back-office dan front-office'
+          },
+          {
+            code: '700.02.06.000',
+            name: 'Medical',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan pengobatan rawat jalan dan kacamata karyawan.',
+            example: 'Reimbursement klaim kuitansi pengobatan rawat jalan staf'
+          },
+          {
+            code: '700.02.07.000',
+            name: 'Long Leave',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan cuti panjang (cuti besar) masa kerja karyawan.',
+            example: 'Kompensasi tunjangan cuti panjang 5 tahunan karyawan'
+          },
+          {
+            code: '700.02.08.000',
+            name: 'Life Insurance',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan premi asuransi jiwa tenaga kerja.',
+            example: 'Premi asuransi jiwa perlindungan kecelakaan kerja'
+          },
+          {
+            code: '700.02.09.000',
+            name: 'BPJS Ketenagakerjaan',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Tunjangan JKK (Jaminan Kecelakaan Kerja) & JKM (Jaminan Kematian) yang ditanggung perusahaan.',
+            example: 'Setoran iuran JKK & JKM BPJS Ketenagakerjaan cabang'
+          },
+          {
+            code: '700.02.10.000',
+            name: 'BPJS Kesehatan',
+            cc: 'Opex',
+            tax: '-',
+            detail: 'Iuran BPJS Kesehatan karyawan yang ditanggung oleh perusahaan.',
+            example: 'Setoran premi BPJS Kesehatan porsi perusahaan 4%'
           }
         ]
       }
     ]
   },
   {
-    groupCode: '72000000',
-    groupName: 'GENERAL & ADMINISTRATIVE (G&A) - BEBAN UMUM & ADMINISTRASI',
+    groupCode: '710',
+    groupName: 'SELLING EXPENSES (SE)',
+    color: 'indigo',
+    subgroups: [
+      {
+        code: '710.01.00.000',
+        name: 'Delivery & Freight Expenses',
+        accounts: [
+          {
+            code: '710.01.01.000',
+            name: 'Ekspedisi & Car Carrier Pengiriman Unit',
+            cc: 'CC-740 Warehouse',
+            tax: 'PPh 23 (2%)',
+            detail: 'Biaya ekspedisi car carrier pengangkutan mobil/motor baru dari pusat logistik ke showroom atau antar cabang.',
+            example: 'Ongkos car carrier pengiriman 5 unit Avanza dari Pool Sunter'
+          },
+          {
+            code: '710.01.02.000',
+            name: 'Jasa Towing & Storing Kendaraan',
+            cc: 'CC-710 Showroom',
+            tax: 'PPh 23 (2%)',
+            detail: 'Biaya mobil derek towing unit mogok, evakuasi storing konsumen, atau pengiriman unit khusus.',
+            example: 'Jasa derek towing storing darurat unit customer dari tol ke bengkel cabang'
+          }
+        ]
+      },
+      {
+        code: '710.02.00.000',
+        name: 'Advertising & Promotion Expenses',
+        accounts: [
+          {
+            code: '710.02.01.000',
+            name: 'Pameran & Mall Exhibition Display',
+            cc: 'CC-710 Showroom',
+            tax: 'PPh 4(2) / PPh 23',
+            detail: 'Sewa space atrium mall, backdrop pameran, dekorasi booth display, dan kepesertaan Astra Auto Fest.',
+            example: 'Sewa atrium mall pameran weekend exhibition & dekorasi booth SPK'
+          },
+          {
+            code: '710.02.02.000',
+            name: 'Media Digital & Billboard Reklame',
+            cc: 'CC-710 Showroom',
+            tax: 'PPh 23 (2%)',
+            detail: 'Iklan digital Facebook/Google Ads, billboard jalan raya, spanduk cabang, dan media promosi cetak.',
+            example: 'Iklan berbayar Meta Ads & pasang banner promosi showroom'
+          },
+          {
+            code: '710.02.03.000',
+            name: 'Brosur, Flyer, Merchandise & Souvenir SPK',
+            cc: 'CC-710 Showroom',
+            tax: 'Non-Objek PPh',
+            detail: 'Cetak brosur spesifikasi mobil, flyer sales promo, payung souvenir SPK, pouch, dan merchandise pelanggan.',
+            example: 'Cetak 2.000 lembar brosur spesifikasi unit & souvenir payung SPK'
+          }
+        ]
+      },
+      {
+        code: '710.03.00.000',
+        name: 'Sales Force & Test Drive Operational',
+        accounts: [
+          {
+            code: '710.03.01.000',
+            name: 'BBM, Tol & Parkir Armada Test Drive Sales',
+            cc: 'CC-710 Showroom',
+            tax: 'Non-Objek PPh',
+            detail: 'BBM bensin/solar, kartu e-toll, dan karcis parkir operasional mobil test drive untuk calon pembeli.',
+            example: 'Beli bensin Pertamax & saldo e-toll mobil test drive showroom'
+          },
+          {
+            code: '710.03.02.000',
+            name: 'Service & Pemeliharaan Mobil Sales',
+            cc: 'CC-730 Workshop',
+            tax: 'PPh 23 (Jasa)',
+            detail: 'Ganti oli mesin, salon mobil display, cuci mobil, dan perbaikan armada operasional sales.',
+            example: 'Cuci mobil display showroom & ganti oli mobil operasional sales'
+          }
+        ]
+      },
+      {
+        code: '710.04.00.000',
+        name: 'Commission & Incentive Expenses',
+        accounts: [
+          {
+            code: '710.04.01.000',
+            name: 'Insentif Pencapaian Target Sales Force',
+            cc: 'CC-710 Showroom',
+            tax: 'PPh 21',
+            detail: 'Komisi dan insentif pencapaian kuota penjualan SPK/DO bulanan tim wiraniaga.',
+            example: 'Bonus insentif penjualan pencapaian 15 unit DO wiraniaga'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    groupCode: '720',
+    groupName: 'GENERAL & ADMINISTRATIVE (G&A)',
     color: 'blue',
     subgroups: [
       {
-        code: '72100000',
-        name: 'Beban Ketenagakerjaan & Personalia',
+        code: '720.01.00.000',
+        name: 'Office Stationery & Supplies',
         accounts: [
-          { 
-            code: '72101000', 
-            name: 'Gaji Pokok, Tunjangan & Lembur Staf', 
-            cc: 'CC-720 GA',
-            tax: 'PPh 21',
-            detail: 'Gaji pokok, tunjangan fungsional, dan kompensasi upah lembur resmi staf administrasi, finance, dan back-office cabang.',
-            example: 'Pembayaran upah lembur staf admin finance saat closing akhir bulan'
-          },
-          { 
-            code: '72102000', 
-            name: 'BPJS Ketenagakerjaan & Kesehatan SO', 
+          {
+            code: '720.01.01.000',
+            name: 'Alat Tulis Kantor (ATK) & Form SPK',
             cc: 'CC-720 GA',
             tax: 'Non-Objek PPh',
-            detail: 'Iuran jaminan sosial ketenagakerjaan (JKK, JKM, JHT, JP) dan iuran BPJS Kesehatan porsi tanggungan perusahaan.',
-            example: 'Setoran bulanan iuran BPJS Ketenagakerjaan & Kesehatan cabang'
+            detail: 'Kertas HVS A4/F4, pulpen, ordner, tinta printer, form SPK standar, amplop, dan perlengkapan administrasi.',
+            example: 'Beli 5 rim kertas A4, tinta printer Epson, dan ordner map finance'
           },
-          { 
-            code: '72103000', 
-            name: 'Konsumsi Lembur & Kesejahteraan Karyawan', 
-            cc: 'CC-720 GA',
-            tax: 'Non-Objek PPh',
-            detail: 'Nasi kotak/snack konsumsi lembur staf, kopi/teh pantry karyawan, obat P3K, dan kegiatan kebersamaan cabang.',
-            example: 'Beli makanan nasi kotak konsumsi lembur stock opname gudang & closing admin'
-          }
-        ]
-      },
-      {
-        code: '72200000',
-        name: 'Perlengkapan & Cetakan Kantor',
-        accounts: [
-          { 
-            code: '72201000', 
-            name: 'Alat Tulis Kantor (ATK) & Form SPK', 
-            cc: 'CC-720 GA',
-            tax: 'Non-Objek PPh / PPN',
-            detail: 'Kertas HVS A4/F4, pulpen, map ordner, tinta printer, form SPK standar, amplop surat, dan perlengkapan meja kerja.',
-            example: 'Pembelian 5 rim kertas A4, tinta printer Epson, dan binder map ordner finance'
-          },
-          { 
-            code: '72202000', 
-            name: 'Fotokopi & Penggandaan Dokumen', 
+          {
+            code: '720.01.02.000',
+            name: 'Fotokopi & Penggandaan Dokumen',
             cc: 'CC-720 GA',
             tax: 'PPh 23 (2%)',
-            detail: 'Biaya sewa mesin fotokopi per bulan atau ongkos fotokopi berkas faktur leasing, BPKB, dan arsip perpajakan.',
-            example: 'Biaya pemakaian klik mesin sewa fotokopi & fotokopi berkas faktur BPKB'
+            detail: 'Sewa mesin fotokopi bulanan, klik sewa, dan biaya fotokopi berkas faktur BPKB leasing.',
+            example: 'Biaya sewa mesin fotokopi bulanan & penggandaan berkas faktur'
           }
         ]
       },
       {
-        code: '72300000',
-        name: 'Beban Utilitas & Komunikasi',
+        code: '720.02.00.000',
+        name: 'Utilities & Communication Expenses',
         accounts: [
-          { 
-            code: '72301000', 
-            name: 'Listrik PLN Gardu Cabang & Showroom', 
+          {
+            code: '720.02.01.000',
+            name: 'Listrik PLN Gardu Cabang & Showroom',
             cc: 'CC-720 GA',
             tax: 'PPN Bebas',
-            detail: 'Tagihan listrik pascabayar PLN atau pembelian token listrik prabayar gedung showroom, workshop, dan kantor cabang.',
-            example: 'Pembayaran tagihan rekening listrik PLN ID Pelanggan 54120009812 bulan berjalan'
+            detail: 'Tagihan listrik pascabayar PLN atau token listrik prabayar gedung showroom dan kantor cabang.',
+            example: 'Bayar rekening listrik PLN ID 54120009812 bulan berjalan'
           },
-          { 
-            code: '72302000', 
-            name: 'Air Bersih PDAM & Air Minum Galon', 
+          {
+            code: '720.02.02.000',
+            name: 'Air Bersih PDAM & Air Minum Galon',
             cc: 'CC-720 GA',
             tax: 'Non-Objek PPh',
-            detail: 'Tagihan air bersih PDAM bulanan dan pembelian isi ulang air galon (Aqua, Cleo, dll) untuk dispenser ruang tamu & staf.',
+            detail: 'Tagihan air PDAM bulanan dan pembelian isi ulang air galon (Aqua, Cleo, dll) untuk dispenser ruang tamu & staf.',
             example: 'Beli 15 galon air minum Aqua/Cleo untuk dispenser showroom & tagihan PDAM'
           },
-          { 
-            code: '72303000', 
-            name: 'Internet Fiber Optic, Bandwidth & VPN', 
+          {
+            code: '720.02.03.000',
+            name: 'Internet Fiber Optic, Bandwidth & VPN',
             cc: 'CC-720 GA',
-            tax: 'PPh 23 (2%) / PPN',
+            tax: 'PPh 23 (2%)',
             detail: 'Langganan internet fiber optic (IndiHome/Biznet/Lintasarta), dedicated bandwidth, dan link VPN koneksi SAP ke Head Office.',
-            example: 'Tagihan bulanan internet dedicated fiber optic Biznet & koneksi VPN SAP ECC'
+            example: 'Tagihan bulanan internet dedicated fiber optic Biznet & koneksi VPN SAP'
           }
         ]
       },
       {
-        code: '72400000',
-        name: 'Pemeliharaan Gedung & Fasilitas',
+        code: '720.03.00.000',
+        name: 'Building & Facilities Maintenance',
         accounts: [
-          { 
-            code: '72401000', 
-            name: 'Perawatan Gedung & Fasilitas Showroom', 
+          {
+            code: '720.03.01.000',
+            name: 'Perawatan Gedung & Fasilitas Showroom',
             cc: 'CC-710 Showroom',
             tax: 'PPh 4(2) / PPh 23',
-            detail: 'Pengecatan ulang, perbaikan plafon bocor, penggantian lampu LED showroom, kunci pintu, dan perbaikan toilet.',
-            example: 'Jasa perbaikan kebocoran atap kanopi & penggantian lampu spotlight showroom'
+            detail: 'Pengecatan ulang, perbaikan atap bocor, penggantian lampu LED showroom, kunci pintu, dan perbaikan toilet.',
+            example: 'Jasa perbaikan kebocoran kanopi & ganti lampu spotlight showroom'
           },
-          { 
-            code: '72402000', 
-            name: 'Service Berkala AC Ducting Showroom', 
+          {
+            code: '720.03.02.000',
+            name: 'Service Berkala AC Ducting Showroom',
             cc: 'CC-710 Showroom',
             tax: 'PPh 23 (2%)',
-            detail: 'Cuci berkala AC split/cassette/ducting, penambahan gas freon, dan perbaikan kompresor pendingin ruangan.',
-            example: 'Jasa cuci berkala 8 unit AC cassette showroom & isi ulang gas freon R32'
+            detail: 'Cuci berkala AC cassette/split, penambahan freon R32/R410, dan perbaikan kompresor pendingin.',
+            example: 'Jasa cuci berkala 8 unit AC cassette showroom & isi ulang gas freon'
           },
-          { 
-            code: '72403000', 
-            name: 'Servis & Sparepart Genset Cadangan', 
+          {
+            code: '720.03.03.000',
+            name: 'Servis & Sparepart Genset Cadangan',
             cc: 'CC-720 GA',
             tax: 'PPh 23 (Jasa)',
-            detail: 'Ganti oli genset diesel, ganti filter solar/oli, pemanasan rutin, aki starter, dan servis darurat daya listrik cabang.',
+            detail: 'Ganti oli genset diesel, ganti filter solar/oli, pemanasan berkala, aki starter, dan servis darurat genset.',
             example: 'Penggantian oli mesin & filter solar genset cadangan darurat 100 kVA'
           }
         ]
       },
       {
-        code: '72500000',
+        code: '720.04.00.000',
         name: 'IT, Software License & Cloud',
         accounts: [
-          { 
-            code: '72501000', 
-            name: 'Lisensi Sistem SAP ECC & Database', 
+          {
+            code: '720.04.01.000',
+            name: 'Lisensi Sistem SAP ECC & Database',
             cc: 'CC-720 GA',
             tax: 'PPh 23 (2%)',
             detail: 'Alokasi biaya lisensi user SAP ECC, database Oracle/SQL, dan maintenance fee sistem core ERP Astra.',
-            example: 'Alokasi biaya perpanjangan lisensi user SAP ECC cabang periode Q3'
+            example: 'Alokasi biaya perpanjangan lisensi user SAP ECC cabang'
           },
-          { 
-            code: '72502000', 
-            name: 'Langganan Cloud SaaS, Zoom & Security', 
+          {
+            code: '720.04.02.000',
+            name: 'Langganan Cloud SaaS, Zoom & Security',
             cc: 'CC-720 GA',
             tax: 'PPN PMSE / PPh 23',
-            detail: 'Langganan software cloud Zoom meeting, Google Workspace/Microsoft 365, antivirus endpoint, dan sertifikat SSL.',
+            detail: 'Langganan software cloud Zoom meeting, Microsoft 365, antivirus endpoint, dan sertifikat domain/SSL.',
             example: 'Perpanjangan tahunan langganan Zoom Pro & antivirus endpoint laptop staf'
           }
         ]
       },
       {
-        code: '72600000',
-        name: 'Jasa Outsourcing & Profesional',
+        code: '720.05.00.000',
+        name: 'Outsourcing & Professional Services',
         accounts: [
-          { 
-            code: '72601000', 
-            name: 'Jasa Security & Cleaning Service Cabang', 
+          {
+            code: '720.05.01.000',
+            name: 'Jasa Security & Cleaning Service Cabang',
             cc: 'CC-720 GA',
             tax: 'PPh 23 (2%)',
             detail: 'Biaya manajemen jasa keamanan satpam 24 jam dan tenaga kebersihan cleaning service/OB kantor cabang.',
-            example: 'Tagihan bulanan invoice vendor jasa pengamanan satpam & cleaning service cabang'
+            example: 'Tagihan bulanan invoice vendor jasa pengamanan satpam & cleaning service'
           }
         ]
       }
@@ -258,27 +335,42 @@ const astraCoaDatabase = [
   }
 ];
 
-// Smart Intent Keywords tailored to Astra SO 2021 operational expenses
+// Smart Intent Keywords yang dipetakan ke Kode Akun Presisi Astra SO
 const intentKeywords = [
-  { trigger: ['air', 'galon', 'pdam', 'aqua', 'minum', 'cleo', 'le minerale', 'dispenser'], coa: '72302000', name: '72302000 - Air Bersih PDAM & Air Minum Galon', score: '99%' },
-  { trigger: ['listrik', 'pln', 'token', 'gardu', 'kwh', 'daya'], coa: '72301000', name: '72301000 - Listrik PLN Gardu Cabang & Showroom', score: '98%' },
-  { trigger: ['oli', 'genset', 'generator', 'filter solar', 'aki genset'], coa: '72403000', name: '72403000 - Servis & Sparepart Genset Cadangan', score: '97%' },
-  { trigger: ['wifi', 'internet', 'fiber', 'indihome', 'biznet', 'vpn', 'bandwidth'], coa: '72303000', name: '72303000 - Internet Fiber Optic, Bandwidth & VPN', score: '95%' },
-  { trigger: ['ac', 'ducting', 'freon', 'cuci ac', 'dingin', 'cassette', 'split'], coa: '72402000', name: '72402000 - Service Berkala AC Ducting Showroom', score: '96%' },
-  { trigger: ['gedung', 'cat', 'lampu', 'plafon', 'pintu', 'renovasi', 'bocor', 'kunci', 'toilet'], coa: '72401000', name: '72401000 - Perawatan Gedung & Fasilitas Showroom', score: '93%' },
-  { trigger: ['pameran', 'mall', 'booth', 'event', 'display', 'auto fest', 'atrium'], coa: '71201000', name: '71201000 - Pameran, Mall Exhibition & Event Display', score: '96%' },
-  { trigger: ['iklan', 'billboard', 'spanduk', 'banner', 'ads', 'reklame', 'koran'], coa: '71202000', name: '71202000 - Iklan Media Digital, Cetak & Billboard', score: '92%' },
-  { trigger: ['brosur', 'flyer', 'merchandise', 'souvenir', 'goodie bag', 'payung', 'gantungan'], coa: '71203000', name: '71203000 - Brosur, Flyer, Merchandise & Souvenir SPK', score: '94%' },
-  { trigger: ['bbm', 'bensin', 'pertamax', 'tol', 'solar', 'parkir', 'test drive', 'e-toll'], coa: '71301000', name: '71301000 - BBM, Tol & Parkir Armada Test Drive Sales', score: '97%' },
-  { trigger: ['carrier', 'towing', 'ekspedisi', 'ongkir', 'kirim unit', 'storing', 'derek'], coa: '71101000', name: '71101000 - Ekspedisi & Car Carrier Pengiriman Unit', score: '95%' },
-  { trigger: ['atk', 'kertas', 'pulpen', 'form spk', 'tinta', 'ordner', 'hvs', 'map'], coa: '72201000', name: '72201000 - Alat Tulis Kantor (ATK) & Form SPK', score: '95%' },
-  { trigger: ['fotokopi', 'copy', 'jilid', 'cetak berkas', 'faktur', 'bpkb'], coa: '72202000', name: '72202000 - Fotokopi & Penggandaan Dokumen', score: '94%' },
-  { trigger: ['makan', 'snack', 'konsumsi', 'katering', 'lemburan', 'nasi kotak', 'kopi', 'teh'], coa: '72103000', name: '72103000 - Konsumsi Lembur & Kesejahteraan Karyawan', score: '95%' },
-  { trigger: ['gaji', 'honor', 'lembur', 'staff', 'karyawan', 'upah'], coa: '72101000', name: '72101000 - Gaji Pokok, Tunjangan & Lembur Staf', score: '96%' },
-  { trigger: ['bpjs', 'jamsostek', 'kesehatan', 'ketenagakerjaan'], coa: '72102000', name: '72102000 - BPJS Ketenagakerjaan & Kesehatan SO', score: '97%' },
-  { trigger: ['sap', 'erp', 'ecc', 'oracle', 'database', 'license'], coa: '72501000', name: '72501000 - Lisensi Sistem SAP ECC & Database', score: '98%' },
-  { trigger: ['zoom', 'cloud', 'antivirus', 'endpoint', 'office 365', 'google workspace', 'ssl'], coa: '72502000', name: '72502000 - Langganan Cloud SaaS, Zoom & Security', score: '96%' },
-  { trigger: ['security', 'satpam', 'cleaning', 'kebersihan', 'ob', 'office boy', 'jasa jaga'], coa: '72601000', name: '72601000 - Jasa Security & Cleaning Service Cabang', score: '94%' }
+  // 700 - EMPLOYEE COMPENSATION
+  { trigger: ['gaji', 'salary', 'salaries', 'honor', 'upah'], coa: '700.01.00.000', name: '700.01.00.000 - Salaries', score: '99%' },
+  { trigger: ['penempatan', 'placement', 'mutasi'], coa: '700.02.01.000', name: '700.02.01.000 - Placement Allowance', score: '97%' },
+  { trigger: ['operasional sales', 'allowance operational'], coa: '700.02.02.000', name: '700.02.02.000 - Operational Allowance', score: '96%' },
+  { trigger: ['transport', 'transportation', 'ongkos'], coa: '700.02.03.000', name: '700.02.03.000 - Transportation Allowance', score: '96%' },
+  { trigger: ['supir', 'driver'], coa: '700.02.04.000', name: '700.02.04.000 - Driver Allowance', score: '97%' },
+  { trigger: ['makan', 'meal', 'uang makan'], coa: '700.02.05.000', name: '700.02.05.000 - Meal Allowance', score: '97%' },
+  { trigger: ['obat', 'medical', 'kacamata', 'pengobatan', 'rawat jalan'], coa: '700.02.06.000', name: '700.02.06.000 - Medical Allowance', score: '98%' },
+  { trigger: ['cuti besar', 'cuti panjang', 'long leave'], coa: '700.02.07.000', name: '700.02.07.000 - Long Leave Allowance', score: '98%' },
+  { trigger: ['asuransi jiwa', 'life insurance'], coa: '700.02.08.000', name: '700.02.08.000 - Life Insurance Allowance', score: '98%' },
+  { trigger: ['bpjs ketenagakerjaan', 'jkk', 'jkm', 'jamsostek'], coa: '700.02.09.000', name: '700.02.09.000 - BPJS Ketenagakerjaan', score: '99%' },
+  { trigger: ['bpjs kesehatan', 'iuran bpjs'], coa: '700.02.10.000', name: '700.02.10.000 - BPJS Kesehatan', score: '99%' },
+
+  // 710 - SELLING EXPENSES
+  { trigger: ['carrier', 'towing', 'ekspedisi', 'ongkir', 'kirim unit', 'storing', 'derek'], coa: '710.01.01.000', name: '710.01.01.000 - Car Carrier & Ekspedisi Pengiriman Unit', score: '97%' },
+  { trigger: ['pameran', 'mall', 'booth', 'event', 'display', 'auto fest', 'atrium'], coa: '710.02.01.000', name: '710.02.01.000 - Pameran & Mall Exhibition Display', score: '96%' },
+  { trigger: ['iklan', 'billboard', 'spanduk', 'banner', 'ads', 'reklame', 'meta ads', 'google ads'], coa: '710.02.02.000', name: '710.02.02.000 - Media Digital & Billboard Reklame', score: '95%' },
+  { trigger: ['brosur', 'flyer', 'merchandise', 'souvenir', 'goodie bag', 'payung', 'gantungan'], coa: '710.02.03.000', name: '710.02.03.000 - Brosur, Flyer & Merchandise SPK', score: '96%' },
+  { trigger: ['bbm', 'bensin', 'pertamax', 'tol', 'solar', 'parkir', 'test drive', 'e-toll'], coa: '710.03.01.000', name: '710.03.01.000 - BBM, Tol & Parkir Armada Test Drive', score: '98%' },
+  { trigger: ['cuci mobil', 'salon mobil', 'servis mobil sales'], coa: '710.03.02.000', name: '710.03.02.000 - Service & Cuci Mobil Armada Sales', score: '95%' },
+  { trigger: ['insentif', 'komisi', 'sales force', 'bonus spk'], coa: '710.04.01.000', name: '710.04.01.000 - Insentif Wiraniaga / Sales Force', score: '97%' },
+
+  // 720 - GENERAL & ADMINISTRATIVE (G&A)
+  { trigger: ['atk', 'kertas', 'pulpen', 'form spk', 'tinta', 'ordner', 'hvs', 'map'], coa: '720.01.01.000', name: '720.01.01.000 - Alat Tulis Kantor (ATK) & Form SPK', score: '98%' },
+  { trigger: ['fotokopi', 'copy', 'jilid', 'cetak dokumen', 'sewa fotokopi'], coa: '720.01.02.000', name: '720.01.02.000 - Fotokopi & Penggandaan Dokumen', score: '96%' },
+  { trigger: ['listrik', 'pln', 'token', 'gardu', 'kwh', 'daya'], coa: '720.02.01.000', name: '720.02.01.000 - Listrik PLN Gardu Cabang & Showroom', score: '99%' },
+  { trigger: ['air', 'galon', 'pdam', 'aqua', 'minum', 'cleo', 'le minerale', 'dispenser'], coa: '720.02.02.000', name: '720.02.02.000 - Air Bersih PDAM & Air Minum Galon', score: '99%' },
+  { trigger: ['wifi', 'internet', 'fiber', 'indihome', 'biznet', 'vpn', 'bandwidth'], coa: '720.02.03.000', name: '720.02.03.000 - Internet Fiber Optic, Bandwidth & VPN', score: '97%' },
+  { trigger: ['gedung', 'cat', 'lampu', 'plafon', 'pintu', 'renovasi', 'bocor', 'kunci', 'toilet'], coa: '720.03.01.000', name: '720.03.01.000 - Perawatan Gedung & Fasilitas Showroom', score: '95%' },
+  { trigger: ['ac', 'ducting', 'freon', 'cuci ac', 'dingin', 'cassette', 'split'], coa: '720.03.02.000', name: '720.03.02.000 - Service Berkala AC Ducting Showroom', score: '97%' },
+  { trigger: ['oli', 'genset', 'generator', 'filter solar', 'aki genset'], coa: '720.03.03.000', name: '720.03.03.000 - Servis & Sparepart Genset Cadangan', score: '98%' },
+  { trigger: ['sap', 'erp', 'ecc', 'oracle', 'database', 'license'], coa: '720.04.01.000', name: '720.04.01.000 - Lisensi Sistem SAP ECC & Database', score: '99%' },
+  { trigger: ['zoom', 'cloud', 'antivirus', 'endpoint', 'office 365', 'google workspace', 'ssl'], coa: '720.04.02.000', name: '720.04.02.000 - Langganan Cloud SaaS, Zoom & Security', score: '96%' },
+  { trigger: ['security', 'satpam', 'cleaning', 'kebersihan', 'ob', 'office boy', 'jasa jaga'], coa: '720.05.01.000', name: '720.05.01.000 - Jasa Security & Cleaning Service Cabang', score: '97%' }
 ];
 
 // Attach to window namespace for compatibility

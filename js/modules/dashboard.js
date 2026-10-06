@@ -7,7 +7,10 @@ function renderDashboard() {
   const { transactions, proposals, activeFilter, searchQuery } = window.appState;
 
   const filtered = transactions.filter(item => {
-    const matchesFilter = activeFilter === 'ALL' || item.category === activeFilter;
+    const matchesFilter = activeFilter === 'ALL' || 
+      item.category === activeFilter || 
+      (item.category && item.category.startsWith(activeFilter)) || 
+      (item.coa && item.coa.startsWith(activeFilter));
     const matchesSearch = searchQuery === '' || 
       (item.desc && item.desc.toLowerCase().includes(searchQuery)) ||
       (item.ref && item.ref.toLowerCase().includes(searchQuery)) ||
@@ -19,8 +22,8 @@ function renderDashboard() {
 
   // Calculate KPIs
   const totalAmount = transactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  const seAmount = transactions.filter(t => t.category === '7100').reduce((s, i) => s + (Number(i.amount) || 0), 0);
-  const gaAmount = transactions.filter(t => t.category !== '7100').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const seAmount = transactions.filter(t => (t.category && t.category.startsWith('71')) || (t.coa && t.coa.startsWith('710'))).reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const gaAmount = transactions.filter(t => !((t.category && t.category.startsWith('71')) || (t.coa && t.coa.startsWith('710')))).reduce((s, i) => s + (Number(i.amount) || 0), 0);
 
   const kpiTotalOpex = document.getElementById('kpiTotalOpex');
   const kpiSeTotal = document.getElementById('kpiSeTotal');
