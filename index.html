@@ -147,10 +147,11 @@
             <span class="hidden sm:inline" id="syncStatusLabel">Tarik Data Sheet</span>
           </button>
 
-          <!-- Desktop Primary Button -->
-          <button onclick="openTransactionModal()" class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            <span>Catat Beban</span>
+          <!-- Desktop Primary Search Button -->
+          <button onclick="openSearchModal()" class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-500/25 transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <span>Cari Akun Opex</span>
+            <kbd class="hidden lg:inline-block text-[9px] px-1.5 py-0.5 rounded bg-white/20 font-mono font-normal">Ctrl+K</kbd>
           </button>
 
           <!-- iOS Specular Theme Switcher -->
@@ -456,12 +457,12 @@
           <span class="text-[9px] font-bold mt-0.5">Kamus</span>
         </button>
 
-        <!-- CENTER FLOATING ACTION: CATAT BEBAN -->
-        <button onclick="openTransactionModal()" class="flex flex-col items-center justify-center -mt-5 mx-1">
+        <!-- CENTER FLOATING ACTION: PENCARIAN CERDAS -->
+        <button onclick="openSearchModal()" class="flex flex-col items-center justify-center -mt-5 mx-1">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-600/40 border border-white/30 active:scale-95 transition-all">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
           </div>
-          <span class="text-[9px] font-bold text-blue-600 dark:text-blue-400 mt-1">Catat</span>
+          <span class="text-[9px] font-bold text-blue-600 dark:text-blue-400 mt-1">Cari Akun</span>
         </button>
 
         <!-- Tab 3: Approval -->
@@ -480,6 +481,42 @@
       </nav>
 
     </main>
+  </div>
+
+  <!-- SMART SPOTLIGHT SEARCH MODAL (KAMUS PENCARIAN CERDAS) -->
+  <div id="searchModal" class="fixed inset-0 z-50 hidden flex items-start sm:items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md transition-all">
+    <div class="w-full max-w-2xl rounded-3xl glass-panel p-5 sm:p-6 space-y-4 max-h-[90vh] flex flex-col shadow-2xl border border-white/20 mt-4 sm:mt-0">
+      
+      <!-- Header & Search Input -->
+      <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3 gap-3">
+        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+          <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          <input 
+            id="smartSearchInput" 
+            type="text" 
+            placeholder="Cari pengeluaran (cth: beli air galon, servis genset, cuci ac, atk)..." 
+            oninput="handleSmartSearch(this.value)"
+            class="w-full bg-transparent text-sm sm:text-base font-medium text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+            autocomplete="off"
+          >
+        </div>
+        <button onclick="closeSearchModal()" class="p-1.5 rounded-xl hover:bg-slate-500/10 text-slate-400 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Result Counter / Category Hint -->
+      <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-1">
+        <span id="searchResultStats">Ketik pengeluaran atau pilih topik cepat di bawah:</span>
+        <span class="font-mono hidden sm:inline text-[10px] text-slate-400">Tekan ESC untuk menutup</span>
+      </div>
+
+      <!-- Results Scroll Area -->
+      <div id="smartSearchResultsContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <!-- Rendered dynamically by search.js -->
+      </div>
+
+    </div>
   </div>
 
   <!-- TRANSACTION INPUT MODAL -->
@@ -833,6 +870,7 @@ function doGet(e) {
   <script src="js/modules/approvals.js"></script>
   <script src="js/modules/transactions.js"></script>
   <script src="js/modules/dashboard.js"></script>
+  <script src="js/modules/search.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

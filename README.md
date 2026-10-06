@@ -25,7 +25,8 @@ expenseflow-astra-so/
 │   │   ├── coa.js             # Hierarki pohon COA & pencarian akun leaf
 │   │   ├── approvals.js       # Antrean otorisasi dual-control untuk proposal akun baru
 │   │   ├── transactions.js    # Form entri transaksi & engine smart intent auto-match
-│   │   └── dashboard.js       # Kalkulasi KPI, tabel ledger desktop, card mobile, filter
+│   │   ├── dashboard.js       # Kalkulasi KPI, tabel ledger desktop, card mobile, filter
+│   │   └── search.js          # Spotlight smart search modal (pencarian bahasa alami & kelengkapan akun)
 │   └── app.js                 # Entry point aplikasi, router navigasi, & event lifecycle
 ├── index.html                 # Struktur markup semantik HTML yang bersih & modular
 ├── vercel.json                # Konfigurasi deployment & rewrite Vercel
@@ -36,19 +37,22 @@ expenseflow-astra-so/
 
 ## 🚀 Fitur Utama
 
-1. **Struktur Modular & Clean Code**: Pemisahan tegas antara markup HTML, CSS tokens, master data, logika bisnis, dan API integration.
+1. **Spotlight Smart Search (Pencarian Cerdas)**: Cari pengeluaran menggunakan bahasa alami (contoh: *"beli air galon"*, *"token pln"*, *"servis ac"*, *"bbm test drive"*). Sistem langsung menampilkan:
+   - Kode Akun & Nama Akun COA 8-digit standar Astra SO 2021
+   - Kelompok Induk BAB (SE / G&A) & Sub-Bab
+   - Rekomendasi Cost Center
+   - Status Perpajakan (PPh 21, PPh 23, PPN, Non-Objek PPh)
+   - Ruang Lingkup & Penjelasan Audit
+   - Contoh Redaksi Transaksi Baku
 2. **Kamus COA Astra SO 2021**: Hierarki standar SAP ECC 8-digit terbagi atas:
    - **71000000**: *Selling Expenses* (SE) — Beban Penjualan & Ekspedisi
    - **72000000**: *General & Administrative* (G&A) — Beban Umum & Operasional
-3. **Smart Intent Suggestion**: Pencocokan otomatis deskripsi transaksi ke kode akun leaf COA secara real-time.
-4. **Tata Kelola Dual-Control**: Alur proposal akun baru dengan sistem otorisasi sebelum dapat digunakan.
-5. **Dukungan Dua Arah Google Sheets**: Sinkronisasi data real-time menggunakan Google Apps Script (`gas/Code.gs`) atau serverless proxy Vercel.
-6. **Ekspor CSV**: Unduh pembukuan opex dalam format spreadsheet siap audit.
-7. **Pintasan Keyboard**:
+3. **Dukungan Dua Arah Google Sheets**: Sinkronisasi data real-time menggunakan Google Apps Script (`gas/Code.gs`) atau serverless proxy Vercel.
+4. **Pintasan Keyboard**:
+   - `Ctrl+K` atau `/`: Buka Spotlight Pencarian Cerdas
    - `D`: Buka Buku Beban (Dashboard)
    - `K`: Buka Kamus COA
-   - `N`: Catat Beban Baru
-   - `Esc`: Tutup semua modal / drawer
+   - `Esc`: Tutup modal / drawer yang aktif
 
 ---
 

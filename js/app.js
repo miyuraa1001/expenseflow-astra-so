@@ -100,8 +100,28 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 6. Keyboard Shortcuts Listener (Accessibility & Power Users)
   document.addEventListener('keydown', (e) => {
-    // Ignore keystrokes when typing inside input/textarea/select
+    // Ctrl+K atau Cmd+K membuka pencarian cerdas dari mana saja
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (typeof openSearchModal === 'function') openSearchModal();
+      return;
+    }
+
+    // Tombol '/' saat tidak sedang fokus di form
+    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      if (typeof openSearchModal === 'function') openSearchModal();
+      return;
+    }
+
+    // Abaikan tombol navigasi jika sedang mengetik di input/textarea
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      if (e.key === 'Escape') {
+        if (typeof closeSearchModal === 'function') closeSearchModal();
+        closeTransactionModal();
+        closeProposalDrawer();
+        closeScriptModal();
+      }
       return;
     }
 
@@ -109,10 +129,11 @@ window.addEventListener('DOMContentLoaded', () => {
       switchView('dashboard');
     } else if (e.key === 'k' || e.key === 'K') {
       switchView('coa');
-    } else if (e.key === 'n' || e.key === 'N') {
+    } else if (e.key === 'f' || e.key === 'F') {
       e.preventDefault();
-      openTransactionModal();
+      if (typeof openSearchModal === 'function') openSearchModal();
     } else if (e.key === 'Escape') {
+      if (typeof closeSearchModal === 'function') closeSearchModal();
       closeTransactionModal();
       closeProposalDrawer();
       closeScriptModal();
