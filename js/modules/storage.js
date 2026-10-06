@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   API_TOKEN: 'EF_API_TOKEN',
   TRANSACTIONS: 'EF_TRANSACTIONS',
   PROPOSALS: 'EF_PROPOSALS',
+  MASTER_COA: 'EF_MASTER_COA',
   THEME: 'EF_THEME'
 };
 
@@ -15,6 +16,8 @@ const STORAGE_KEYS = {
 window.appState = {
   transactions: [],
   proposals: [],
+  masterCoa: [],
+  masterCoaTree: null,
   activeFilter: 'ALL',
   searchQuery: '',
   pendingSuggestion: null
@@ -83,6 +86,24 @@ const StorageManager = {
     }
   },
 
+  loadMasterCoa() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.MASTER_COA);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.warn('Storage: Error parsing master COA:', e);
+      return null;
+    }
+  },
+
+  saveMasterCoa(coaData) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MASTER_COA, JSON.stringify(coaData));
+    } catch (e) {
+      console.warn('Storage: Error saving master COA:', e);
+    }
+  },
+
   getGasUrl() {
     return localStorage.getItem(STORAGE_KEYS.GAS_URL) || '';
   },
@@ -110,4 +131,3 @@ const StorageManager = {
 
 window.STORAGE_KEYS = STORAGE_KEYS;
 window.StorageManager = StorageManager;
-

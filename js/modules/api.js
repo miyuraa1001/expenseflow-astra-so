@@ -48,28 +48,61 @@ async function fetchFromGoogleSheets(showNotification = true) {
   if (syncIcon) syncIcon.classList.add('animate-spin', 'text-blue-500');
   if (statusLabel) statusLabel.textContent = 'Menyinkronkan...';
 
+  let txSuccess = false;
+  let coaSuccess = false;
+
   try {
-    const fetchUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_TRANSACTIONS';
-    const res = await fetch(fetchUrl);
-    const json = await res.json();
+    // 1. Tarik Data Transaksi Beban
+    try {
+      const fetchTxUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_TRANSACTIONS';
+      const resTx = await fetch(fetchTxUrl);
+      const jsonTx = await resTx.json();
 
-    if (json.status === 'success' && Array.isArray(json.data)) {
-      window.appState.transactions = json.data;
-      StorageManager.saveTransactions(window.appState.transactions);
+      if (jsonTx.status === 'success' && Array.isArray(jsonTx.data)) {
+        window.appState.transactions = jsonTx.data;
+        StorageManager.saveTransactions(window.appState.transactions);
+        renderDashboard();
+        txSuccess = true;
+      }
+    } catch (eTx) {
+      console.warn('Gagal menarik transaksi:', eTx);
+    }
 
-      renderDashboard();
-      const dot = document.getElementById('sidebarSyncDot');
-      if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
-      if (statusLabel) statusLabel.textContent = 'Tersinkron';
-      if (showNotification) {
+    // 2. Tarik Master Data COA Database
+    try {
+      const fetchCoaUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_MASTER_COA';
+      const resCoa = await fetch(fetchCoaUrl);
+      const jsonCoa = await resCoa.json();
+
+      if (jsonCoa.status === 'success' && Array.isArray(jsonCoa.data) && jsonCoa.data.length > 0) {
+        StorageManager.saveMasterCoa(jsonCoa.data);
+        if (typeof updateCoaFromData === 'function') {
+          updateCoaFromData(jsonCoa.data, jsonCoa.tree || null);
+        }
+        coaSuccess = true;
+      }
+    } catch (eCoa) {
+      console.warn('Gagal menarik master COA:', eCoa);
+    }
+
+    const dot = document.getElementById('sidebarSyncDot');
+    if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+    if (statusLabel) statusLabel.textContent = 'Tersinkron';
+
+    if (showNotification) {
+      if (txSuccess && coaSuccess) {
+        showToast(`Sinkronisasi sukses: ${window.appState.transactions.length} transaksi & seluruh akun COA berhasil dimuat!`, 'success');
+      } else if (txSuccess) {
         showToast(`Berhasil memuat ${window.appState.transactions.length} transaksi dari Google Sheets!`, 'success');
+      } else if (coaSuccess) {
+        showToast('Berhasil memuat data Master COA dari Google Sheets!', 'success');
       }
     }
   } catch (err) {
     console.warn('Sync read error:', err);
     if (statusLabel) statusLabel.textContent = 'Tersimpan Lokal';
     if (showNotification) {
-      showToast('Gagal menarik dari Google Sheets. Data lokal ditampilkan.', 'info');
+      showToast('Gagal menarik data dari Google Sheets. Menampilkan cache lokal.', 'info');
     }
   } finally {
     if (syncIcon) syncIcon.classList.remove('animate-spin');
@@ -115,4 +148,3 @@ window.testGasConnection = testGasConnection;
 window.fetchFromGoogleSheets = fetchFromGoogleSheets;
 window.syncToGoogleSheets = syncToGoogleSheets;
 window.triggerManualSync = triggerManualSync;
-

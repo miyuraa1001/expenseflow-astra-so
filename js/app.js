@@ -77,9 +77,15 @@ window.addEventListener('DOMContentLoaded', () => {
   if (cfgGasInput && savedGas) cfgGasInput.value = savedGas;
   if (cfgTokenInput && savedToken) cfgTokenInput.value = savedToken;
 
-  // 3. Load locally cached transactions and proposals
+  // 3. Load locally cached transactions, proposals, and master COA
   window.appState.transactions = StorageManager.loadTransactions();
   window.appState.proposals = StorageManager.loadProposals();
+  const cachedCoa = StorageManager.loadMasterCoa();
+  if (cachedCoa && typeof updateCoaFromData === 'function') {
+    updateCoaFromData(cachedCoa);
+  } else if (typeof populateCoaDropdown === 'function') {
+    populateCoaDropdown();
+  }
 
   // 4. Initialize UI Subsystems
   initTheme();
