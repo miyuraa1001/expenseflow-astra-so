@@ -1,0 +1,111 @@
+/**
+ * ExpenseFlow — Astra SO Operating Expenses
+ * Core Design Tokens, Physical Specular Glass, and Backdrop Styles
+ */
+
+/* ==========================================================================
+   CSS Reset & Base Defaults
+   ========================================================================== */
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ==========================================================================
+   Ambient Dynamic Gradient Canvas Backdrop
+   ========================================================================== */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -20;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+
+.dark .bg-canvas {
+  background: radial-gradient(circle at 10% 20%, rgba(30, 58, 138, 0.28) 0%, transparent 40%),
+              radial-gradient(circle at 90% 15%, rgba(67, 56, 202, 0.22) 0%, transparent 45%),
+              radial-gradient(circle at 50% 85%, rgba(15, 23, 42, 0.4) 0%, transparent 50%),
+              #070a11;
+}
+
+.light .bg-canvas {
+  background: radial-gradient(circle at 15% 15%, rgba(219, 234, 254, 0.75) 0%, transparent 45%),
+              radial-gradient(circle at 85% 25%, rgba(224, 231, 255, 0.65) 0%, transparent 50%),
+              radial-gradient(circle at 50% 80%, rgba(241, 245, 249, 0.9) 0%, transparent 55%),
+              #f8fafc;
+}
+
+/* ==========================================================================
+   Specular Glassmorphism Tokens (Cards, Panels, Headers)
+   ========================================================================== */
+.glass-panel {
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 30px -10px rgba(148, 163, 184, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+}
+
+/* ==========================================================================
+   Glass Inputs & Controls
+   ========================================================================== */
+.glass-input {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.2s ease;
+}
+
+.dark .glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.dark .glass-input:focus {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.light .glass-input {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  color: #0f172a;
+}
+
+.light .glass-input:focus {
+  background: #ffffff;
+  border-color: rgba(37, 99, 235, 0.7);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ==========================================================================
+   Utility Helpers
+   ========================================================================== */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
