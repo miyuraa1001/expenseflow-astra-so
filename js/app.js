@@ -44,8 +44,9 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Buku Beban Operasional';
     if (subEl) subEl.textContent = 'Astra Sales Operation (SO 2021) • Selling & G&A';
   } else if (viewKey === 'coa') {
-    if (titleEl) titleEl.textContent = 'Kamus Akun COA Astra';
-    if (subEl) subEl.textContent = 'Hierarki Akun Standar SAP ECC 8-Digit SO 2021';
+    if (titleEl) titleEl.textContent = 'Kamus Master COA Astra SO';
+    if (subEl) subEl.textContent = 'Master COA Opex 2021 Presisi Full • Standar Astra Sales Operation';
+    if (typeof renderCoaView === 'function') renderCoaView();
   } else if (viewKey === 'approvals') {
     if (titleEl) titleEl.textContent = 'Persetujuan Kode Akun';
     if (subEl) subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
@@ -90,7 +91,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // 4. Initialize UI Subsystems
   initTheme();
   renderDashboard();
-  renderCoaTree();
+  if (typeof renderCoaView === 'function') {
+    renderCoaView();
+  } else if (typeof renderCoaTree === 'function') {
+    renderCoaTree();
+  }
   renderApprovalQueue();
 
   // 5. Automatic Live Sync with Google Apps Script if configured

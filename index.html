@@ -324,30 +324,74 @@
         <section id="view-coa" class="hidden space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl glass-panel">
             <div>
-              <h2 class="text-base font-bold text-slate-900 dark:text-white">Chart of Accounts (COA) Astra SO 2021</h2>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Struktur 8-Digit SAP ECC: Selling Expenses (71000000) & General Administrative (72000000)</p>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">LIVE DATABASE</span>
+                <h2 class="text-base font-bold text-slate-900 dark:text-white">Kamus Master COA Astra SO 2021</h2>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Data Presisi Sesuai Google Sheets: Tab "COA OPEX 2021 Presisi Full" (BAB 700, 710, 720)</p>
             </div>
-            <button onclick="openProposalDrawer()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-500/20 self-start sm:self-auto">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              <span>Ajukan Akun Leaf Baru</span>
-            </button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="triggerManualSync()" class="px-3 py-2 rounded-xl border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-all">
+                <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                <span>Tarik dari Spreadsheet</span>
+              </button>
+              <button onclick="openProposalDrawer()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>Ajukan Akun Leaf Baru</span>
+              </button>
+            </div>
           </div>
 
-          <!-- COA Quick Search Filter -->
-          <div class="relative">
-            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-            <input 
-              id="coaFilterInput" 
-              type="text" 
-              placeholder="Cari kode akun atau nama akun dalam kamus COA Astra..." 
-              oninput="filterCoaTree(this.value)"
-              class="w-full glass-input text-xs pl-9 pr-4 py-2.5 rounded-xl focus:outline-none"
-            >
+          <!-- Controls: Quick Search, BAB Filter, & View Mode Switcher -->
+          <div class="p-4 rounded-2xl glass-panel space-y-3">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+              <!-- Quick Search Filter -->
+              <div class="relative flex-1">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <input 
+                  id="coaFilterInput" 
+                  type="text" 
+                  placeholder="Cari kata kunci akun (cth: galon, gaji, bbm, atk, internet, pajak)..." 
+                  oninput="handleCoaSearchInput(this.value)"
+                  class="w-full glass-input text-xs pl-9 pr-4 py-2.5 rounded-xl focus:outline-none"
+                >
+              </div>
+
+              <!-- View Switcher Toggle: Table vs Tree -->
+              <div class="flex items-center gap-1 p-1 bg-black/5 dark:bg-white/5 rounded-xl border border-slate-200/50 dark:border-white/5 self-start md:self-auto flex-shrink-0">
+                <button id="coaBtnViewTable" onclick="setCoaViewMode('table')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+                  <span>Tabel Database (Spreadsheet)</span>
+                </button>
+                <button id="coaBtnViewTree" onclick="setCoaViewMode('tree')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+                  <span>Kartu Hierarki</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+              <button onclick="setCoaBabFilter('ALL')" id="coaBabPill-ALL" class="coa-bab-pill px-3 py-1 rounded-lg text-[11px] font-semibold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm whitespace-nowrap">
+                Semua BAB
+              </button>
+              <button onclick="setCoaBabFilter('700')" id="coaBabPill-700" class="coa-bab-pill px-3 py-1 rounded-lg text-[11px] font-semibold border transition-all bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200/60 dark:border-white/10 hover:border-emerald-500/50 whitespace-nowrap">
+                BAB 700 &bull; Employee Compensation
+              </button>
+              <button onclick="setCoaBabFilter('710')" id="coaBabPill-710" class="coa-bab-pill px-3 py-1 rounded-lg text-[11px] font-semibold border transition-all bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200/60 dark:border-white/10 hover:border-indigo-500/50 whitespace-nowrap">
+                BAB 710 &bull; Selling Expenses (SE)
+              </button>
+              <button onclick="setCoaBabFilter('720')" id="coaBabPill-720" class="coa-bab-pill px-3 py-1 rounded-lg text-[11px] font-semibold border transition-all bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200/60 dark:border-white/10 hover:border-blue-500/50 whitespace-nowrap">
+                BAB 720 &bull; General & Admin (G&A)
+              </button>
+            </div>
           </div>
 
-          <div id="coaTreeContainer" class="space-y-4">
-            <!-- COA Tree injected via JS -->
+          <!-- Master COA Database Container -->
+          <div id="coaMainContainer" class="space-y-4">
+            <!-- Table or Tree injected via JS -->
           </div>
+          <div id="coaTreeContainer" class="hidden"></div>
         </section>
 
         <!-- VIEW 3: PERSETUJUAN KODE AKUN (APPROVAL QUEUE) -->
@@ -572,31 +616,41 @@
           </div>
           <select id="fAkunCoa" required class="w-full glass-input px-3 py-2.5 rounded-xl focus:outline-none font-mono text-xs">
             <option value="">-- Pilih Akun COA Astra SO --</option>
-            <optgroup label="71000000 - Selling Expenses (SE)">
-              <option value="71101000">71101000 - Ekspedisi & Car Carrier Pengiriman Unit</option>
-              <option value="71102000">71102000 - Jasa Towing & Storing Kendaraan</option>
-              <option value="71201000">71201000 - Pameran, Mall Exhibition & Event Display</option>
-              <option value="71202000">71202000 - Iklan Media Digital, Cetak & Billboard</option>
-              <option value="71203000">71203000 - Brosur, Flyer, Merchandise & Souvenir SPK</option>
-              <option value="71301000">71301000 - BBM, Tol & Parkir Armada Test Drive Sales</option>
-              <option value="71302000">71302000 - Service & Pemeliharaan Mobil Sales</option>
-              <option value="71401000">71401000 - Insentif Pencapaian Target Sales Force</option>
+            <optgroup label="700 - EMPLOYEE COMPENSATION">
+              <option value="700.01.00.000">700.01.00.000 - Salaries (Gaji Pokok Karyawan)</option>
+              <option value="700.02.01.000">700.02.01.000 - Placement Allowance</option>
+              <option value="700.02.02.000">700.02.02.000 - Operational Allowance Salesman</option>
+              <option value="700.02.03.000">700.02.03.000 - Transportation Allowance</option>
+              <option value="700.02.04.000">700.02.04.000 - Driver Allowance</option>
+              <option value="700.02.05.000">700.02.05.000 - Meal Allowance (Uang Makan)</option>
+              <option value="700.02.06.000">700.02.06.000 - Medical Allowance (Pengobatan)</option>
+              <option value="700.02.07.000">700.02.07.000 - Long Leave Allowance (Cuti Panjang)</option>
+              <option value="700.02.08.000">700.02.08.000 - Life Insurance Allowance</option>
+              <option value="700.02.09.000">700.02.09.000 - BPJS Ketenagakerjaan (JKK & JKM)</option>
+              <option value="700.02.10.000">700.02.10.000 - BPJS Kesehatan SO</option>
             </optgroup>
-            <optgroup label="72000000 - General & Administrative (G&A)">
-              <option value="72101000">72101000 - Gaji Pokok, Tunjangan & Lembur Staf</option>
-              <option value="72102000">72102000 - BPJS Ketenagakerjaan & Kesehatan SO</option>
-              <option value="72103000">72103000 - Konsumsi Lembur & Kesejahteraan Karyawan</option>
-              <option value="72201000">72201000 - Alat Tulis Kantor (ATK) & Form SPK</option>
-              <option value="72202000">72202000 - Fotokopi & Penggandaan Dokumen</option>
-              <option value="72301000">72301000 - Listrik PLN Gardu Cabang & Showroom</option>
-              <option value="72302000">72302000 - Air Bersih PDAM & Air Minum Galon</option>
-              <option value="72303000">72303000 - Internet Fiber Optic, Bandwidth & VPN</option>
-              <option value="72401000">72401000 - Perawatan Gedung & Fasilitas Showroom</option>
-              <option value="72402000">72402000 - Service Berkala AC Ducting Showroom</option>
-              <option value="72403000">72403000 - Servis & Sparepart Genset Cadangan</option>
-              <option value="72501000">72501000 - Lisensi Sistem SAP ECC & Database</option>
-              <option value="72502000">72502000 - Langganan Cloud SaaS, Zoom & Security</option>
-              <option value="72601000">72601000 - Jasa Security & Cleaning Service Cabang</option>
+            <optgroup label="710 - SELLING EXPENSES (SE)">
+              <option value="710.01.01.000">710.01.01.000 - Ekspedisi & Car Carrier Pengiriman Unit</option>
+              <option value="710.01.02.000">710.01.02.000 - Jasa Towing & Storing Kendaraan</option>
+              <option value="710.02.01.000">710.02.01.000 - Pameran & Mall Exhibition Display</option>
+              <option value="710.02.02.000">710.02.02.000 - Media Digital & Billboard Reklame</option>
+              <option value="710.02.03.000">710.02.03.000 - Brosur, Flyer, Merchandise & Souvenir SPK</option>
+              <option value="710.03.01.000">710.03.01.000 - BBM, Tol & Parkir Armada Test Drive Sales</option>
+              <option value="710.03.02.000">710.03.02.000 - Service & Pemeliharaan Mobil Sales</option>
+              <option value="710.04.01.000">710.04.01.000 - Insentif Pencapaian Target Sales Force</option>
+            </optgroup>
+            <optgroup label="720 - GENERAL & ADMINISTRATIVE (G&A)">
+              <option value="720.01.01.000">720.01.01.000 - Alat Tulis Kantor (ATK) & Form SPK</option>
+              <option value="720.01.02.000">720.01.02.000 - Fotokopi & Penggandaan Dokumen</option>
+              <option value="720.02.01.000">720.02.01.000 - Listrik PLN Gardu Cabang & Showroom</option>
+              <option value="720.02.02.000">720.02.02.000 - Air Bersih PDAM & Air Minum Galon</option>
+              <option value="720.02.03.000">720.02.03.000 - Internet Fiber Optic, Bandwidth & VPN</option>
+              <option value="720.03.01.000">720.03.01.000 - Perawatan Gedung & Fasilitas Showroom</option>
+              <option value="720.03.02.000">720.03.02.000 - Service Berkala AC Ducting Showroom</option>
+              <option value="720.03.03.000">720.03.03.000 - Servis & Sparepart Genset Cadangan</option>
+              <option value="720.04.01.000">720.04.01.000 - Lisensi Sistem SAP ECC & Database</option>
+              <option value="720.04.02.000">720.04.02.000 - Langganan Cloud SaaS, Zoom & Security</option>
+              <option value="720.05.01.000">720.05.01.000 - Jasa Security & Cleaning Service Cabang</option>
             </optgroup>
           </select>
         </div>

@@ -29,6 +29,40 @@ function closeSearchModal() {
 function getAllLeafAccounts() {
   const allAccounts = [];
 
+  const flatList = (typeof getActiveCoaFlatList === 'function') ? getActiveCoaFlatList() : [];
+  if (flatList.length > 0) {
+    flatList.forEach(item => {
+      let code = '';
+      let name = '';
+      if (item.kodeSubSubBab && item.kodeSubSubBab !== '-') {
+        code = item.kodeSubSubBab;
+        name = item.namaSubSubBab;
+      } else if (item.kodeSubBab && item.kodeSubBab !== '-' && (!item.catatanPosting || !item.catatanPosting.toLowerCase().includes('sub-bab'))) {
+        code = item.kodeSubBab;
+        name = item.namaSubBab;
+      }
+
+      if (!code || !name) return;
+
+      const bab = item.kodeBab || '720';
+      const color = bab.startsWith('70') ? 'emerald' : bab.startsWith('71') ? 'indigo' : 'blue';
+      allAccounts.push({
+        code: code,
+        name: name,
+        groupCode: bab,
+        groupName: item.kategoriBab || 'OPEX',
+        subgroupCode: item.kodeSubBab || bab,
+        subgroupName: item.namaSubBab || 'Beban Operasional',
+        color: color,
+        cc: item.catatanPosting || 'Opex',
+        tax: item.statusPajak || '-',
+        detail: item.detailPenjelasan || '',
+        example: item.contohRedaksi || ''
+      });
+    });
+    return allAccounts;
+  }
+
   // Jika ada masterCoaTree (dari spreadsheet atau fallback)
   const tree = window.appState.masterCoaTree || window.astraCoaDatabase || [];
   tree.forEach(group => {

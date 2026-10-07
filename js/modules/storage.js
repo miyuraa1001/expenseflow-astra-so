@@ -89,7 +89,21 @@ const StorageManager = {
   loadMasterCoa() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.MASTER_COA);
-      return data ? JSON.parse(data) : null;
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Deteksi cache format 8-digit usang tanpa titik (misal 71101000)
+        const hasLegacy = parsed.some(item => {
+          const code = String(item.kodeCOA || item.code || '');
+          return code && !code.includes('.') && code.length === 8;
+        });
+        if (hasLegacy) {
+          console.info('Storage: Mengosongkan cache COA format 8-digit usang...');
+          localStorage.removeItem(STORAGE_KEYS.MASTER_COA);
+          return null;
+        }
+      }
+      return parsed;
     } catch (e) {
       console.warn('Storage: Error parsing master COA:', e);
       return null;
