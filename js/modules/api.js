@@ -138,7 +138,7 @@ function toggleGasConfigCollapsible() {
 
 const SPREADSHEET_ID = "1wLDVXInlhwaaFr9Hs7uIN2VuPlwIkKED2G9ejFn7Tik";
 const MASTER_COA_SHEET = "COA OPEX 2021 Presisi Full";
-const GVIZ_COA_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(MASTER_COA_SHEET)}`;
+const GVIZ_COA_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(MASTER_COA_SHEET)}`;
 
 async function fetchDirectGvizCoa() {
   try {

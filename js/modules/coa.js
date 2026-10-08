@@ -26,9 +26,6 @@ function getActiveCoaFlatList() {
   if (Array.isArray(window.appState.masterCoa) && window.appState.masterCoa.length > 0) {
     return window.appState.masterCoa;
   }
-  if (Array.isArray(window.astraCoaFlatDatabase) && window.astraCoaFlatDatabase.length > 0) {
-    return window.astraCoaFlatDatabase;
-  }
   return [];
 }
 
@@ -261,6 +258,18 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
   });
 
   currentRenderedRows = filteredList;
+
+  if (rawList.length === 0) {
+    container.innerHTML = `
+      <div class="p-12 text-center glass-panel rounded-2xl space-y-3">
+        <svg class="w-10 h-10 mx-auto text-blue-500 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Menyinkronkan Database dari Google Spreadsheet...</p>
+        <p class="text-xs text-slate-500">Menghubungkan langsung ke tab "COA OPEX 2021 Presisi Full". Data akan muncul dalam sekejap.</p>
+        <button onclick="fetchFromGoogleSheets(true)" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 transition-all">Muat Ulang Sekarang</button>
+      </div>
+    `;
+    return;
+  }
 
   if (filteredList.length === 0) {
     container.innerHTML = `
