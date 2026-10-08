@@ -65,6 +65,70 @@ function updateAccountViewStats() {
   }
 }
 
+function updateCoaLiveStatusUi() {
+  const badge = document.getElementById('coaLiveStatusBadge');
+  const sub = document.getElementById('coaLiveStatusSubtitle');
+  const banner = document.getElementById('coaQuickConnectBanner');
+  const quickInput = document.getElementById('coaQuickGasUrlInput');
+  const url = StorageManager.getGasUrl();
+
+  const isLive = Array.isArray(window.appState.masterCoa) && window.appState.masterCoa.length > 0;
+  const count = isLive ? window.appState.masterCoa.length : (window.astraCoaFlatDatabase ? window.astraCoaFlatDatabase.length : 0);
+
+  if (quickInput && url && !quickInput.value) {
+    quickInput.value = url;
+  }
+
+  if (badge) {
+    if (isLive) {
+      badge.textContent = `🟢 REALTIME DATABASE (${count} BARIS)`;
+      badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
+    } else if (url) {
+      badge.textContent = '🟡 MENYINKRONKAN...';
+      badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse';
+    } else {
+      badge.textContent = '⚠️ CADANGAN LOKAL';
+      badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+    }
+  }
+
+  if (sub) {
+    if (isLive) {
+      sub.textContent = 'Tersinkronisasi 100% Realtime dari Tab "COA OPEX 2021 Presisi Full" Google Spreadsheet';
+    } else if (url) {
+      sub.textContent = 'Sedang menghubungi backend Google Apps Script...';
+    } else {
+      sub.textContent = 'Menampilkan database cadangan. Sambungkan URL Apps Script di bawah untuk data realtime penuh.';
+    }
+  }
+
+  if (banner) {
+    if (url && isLive) {
+      banner.classList.add('hidden');
+    } else {
+      banner.classList.remove('hidden');
+    }
+  }
+}
+
+function connectCoaQuickUrl() {
+  const input = document.getElementById('coaQuickGasUrlInput');
+  if (!input) return;
+  const url = input.value.trim();
+  if (!url) {
+    showToast('Masukkan URL Web App Google Apps Script terlebih dahulu', 'error');
+    return;
+  }
+
+  StorageManager.setGasUrl(url);
+  const cfgInput = document.getElementById('cfgGasUrl');
+  if (cfgInput) cfgInput.value = url;
+
+  showToast('Menghubungkan ke Google Spreadsheet...', 'info');
+  updateCoaLiveStatusUi();
+  fetchFromGoogleSheets(true);
+}
+
 function toggleGasConfigCollapsible() {
   const panel = document.getElementById('gasConfigCollapsible');
   if (panel) {
@@ -74,15 +138,20 @@ function toggleGasConfigCollapsible() {
 
 async function fetchFromGoogleSheets(showNotification = true) {
   const url = StorageManager.getGasUrl();
-  if (!url) return;
+  if (!url) {
+    updateCoaLiveStatusUi();
+    return;
+  }
 
   const syncIcon = document.getElementById('syncIconSvg');
   const accSyncIcon = document.getElementById('accSyncIcon');
+  const coaSyncIcon = document.getElementById('coaSyncBtnIcon');
   const statusLabel = document.getElementById('syncStatusLabel');
   const btnAccountSync = document.getElementById('btnAccountSyncNow');
 
   if (syncIcon) syncIcon.classList.add('animate-spin', 'text-blue-500');
   if (accSyncIcon) accSyncIcon.classList.add('animate-spin');
+  if (coaSyncIcon) coaSyncIcon.classList.add('animate-spin');
   if (statusLabel) statusLabel.textContent = 'Menyinkronkan...';
   if (btnAccountSync) btnAccountSync.classList.add('opacity-75', 'pointer-events-none');
 
@@ -121,6 +190,7 @@ async function fetchFromGoogleSheets(showNotification = true) {
     if (statusLabel) statusLabel.textContent = 'Tersinkron';
 
     updateAccountViewStats();
+    updateCoaLiveStatusUi();
 
     if (showNotification) {
       if (txSuccess && coaSuccess) {
@@ -128,7 +198,7 @@ async function fetchFromGoogleSheets(showNotification = true) {
       } else if (txSuccess) {
         showToast(`Berhasil memuat ${window.appState.transactions.length} transaksi dari Google Sheets!`, 'success');
       } else if (coaSuccess) {
-        showToast('Berhasil memuat data Master COA dari Google Sheets!', 'success');
+        showToast(`Berhasil memuat ${window.appState.masterCoa.length} akun Master COA langsung dari Google Sheets!`, 'success');
       } else {
         showToast('Respons diterima dari backend Google Sheets.', 'info');
       }
@@ -136,12 +206,14 @@ async function fetchFromGoogleSheets(showNotification = true) {
   } catch (err) {
     console.warn('Sync read error:', err);
     if (statusLabel) statusLabel.textContent = 'Tersimpan Lokal';
+    updateCoaLiveStatusUi();
     if (showNotification) {
       showToast('Gagal menarik data dari Google Sheets. Menampilkan cache lokal.', 'info');
     }
   } finally {
     if (syncIcon) syncIcon.classList.remove('animate-spin');
     if (accSyncIcon) accSyncIcon.classList.remove('animate-spin');
+    if (coaSyncIcon) coaSyncIcon.classList.remove('animate-spin');
     if (btnAccountSync) btnAccountSync.classList.remove('opacity-75', 'pointer-events-none');
   }
 }
@@ -188,5 +260,7 @@ window.fetchFromGoogleSheets = fetchFromGoogleSheets;
 window.syncToGoogleSheets = syncToGoogleSheets;
 window.triggerManualSync = triggerManualSync;
 window.updateAccountViewStats = updateAccountViewStats;
+window.updateCoaLiveStatusUi = updateCoaLiveStatusUi;
+window.connectCoaQuickUrl = connectCoaQuickUrl;
 window.toggleGasConfigCollapsible = toggleGasConfigCollapsible;
 

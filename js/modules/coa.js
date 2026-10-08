@@ -216,6 +216,10 @@ function renderCoaView() {
   const container = document.getElementById('coaMainContainer') || document.getElementById('coaTreeContainer');
   if (!container) return;
 
+  if (typeof updateCoaLiveStatusUi === 'function') {
+    updateCoaLiveStatusUi();
+  }
+
   if (coaViewState.mode === 'table') {
     renderCoaTable(container, coaViewState.keyword, coaViewState.activeBab);
   } else {
@@ -521,14 +525,16 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
     `;
   }
 
+  const isLiveDb = Array.isArray(window.appState.masterCoa) && window.appState.masterCoa.length > 0;
+
   // 5. Rakit Keseluruhan Tampilan Tabel
   container.innerHTML = `
     <div class="glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 dark:border-white/10">
       <!-- Top Info Bar -->
       <div class="px-5 py-3 border-b border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/5 dark:bg-white/5">
         <div class="flex items-center gap-2 text-xs font-mono">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="font-bold text-slate-800 dark:text-slate-200">Database Master COA Opex Presisi</span>
+          <span class="w-2 h-2 rounded-full ${isLiveDb ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}"></span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">${isLiveDb ? 'Spreadsheet Realtime: Tab "COA OPEX 2021 Presisi Full"' : 'Database COA Astra SO'}</span>
           <span class="text-slate-400 dark:text-slate-500">&bull; ${totalItems} Baris Ditemukan</span>
         </div>
         <div class="text-[11px] text-slate-400 font-mono">

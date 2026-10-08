@@ -47,6 +47,9 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Kamus Master COA Astra SO';
     if (subEl) subEl.textContent = 'Master COA Opex 2021 Presisi Full • Standar Astra Sales Operation';
     if (typeof renderCoaView === 'function') renderCoaView();
+    if (typeof fetchFromGoogleSheets === 'function' && StorageManager.getGasUrl()) {
+      fetchFromGoogleSheets(false);
+    }
   } else if (viewKey === 'approvals') {
     if (titleEl) titleEl.textContent = 'Persetujuan Kode Akun';
     if (subEl) subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
@@ -105,7 +108,14 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchFromGoogleSheets(false);
   }
 
-  // 6. Keyboard Shortcuts Listener (Accessibility & Power Users)
+  // 6. Periodic Background Sync (Realtime update setiap 45 detik)
+  setInterval(() => {
+    if (typeof fetchFromGoogleSheets === 'function' && StorageManager.getGasUrl()) {
+      fetchFromGoogleSheets(false);
+    }
+  }, 45000);
+
+  // 7. Keyboard Shortcuts Listener (Accessibility & Power Users)
   document.addEventListener('keydown', (e) => {
     // Ctrl+K atau Cmd+K membuka pencarian cerdas dari mana saja
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {

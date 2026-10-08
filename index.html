@@ -325,19 +325,36 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 rounded-2xl glass-panel">
             <div>
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">LIVE DATABASE</span>
+                <span id="coaLiveStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">LIVE DATABASE</span>
                 <h2 class="text-base font-bold text-slate-900 dark:text-white">Kamus Master COA Astra SO 2021</h2>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Data Presisi Sesuai Google Sheets: Tab "COA OPEX 2021 Presisi Full" (BAB 700, 710, 720)</p>
+              <p id="coaLiveStatusSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Data Presisi Sesuai Google Sheets: Tab "COA OPEX 2021 Presisi Full" (BAB 700, 710, 720)</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <button onclick="triggerManualSync()" class="px-3 py-2 rounded-xl border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-all">
-                <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                <span>Tarik dari Spreadsheet</span>
+                <svg id="coaSyncBtnIcon" class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                <span>Sinkron Database</span>
               </button>
               <button onclick="openProposalDrawer()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Ajukan Akun Leaf Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Connect Banner if not yet connected to spreadsheet -->
+          <div id="coaQuickConnectBanner" class="hidden p-4 rounded-2xl bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border border-blue-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs glass-panel">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">⚡</span>
+              <div>
+                <p class="font-bold text-slate-900 dark:text-white">Sambungkan Database Google Spreadsheet Realtime</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Tempelkan URL Web App Google Apps Script Anda agar seluruh data master COA ter-update realtime langsung dari tab spreadsheet.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <input id="coaQuickGasUrlInput" type="text" placeholder="https://script.google.com/macros/s/.../exec" class="glass-input text-xs font-mono px-3 py-2 rounded-xl flex-1 sm:w-80 focus:outline-none" />
+              <button onclick="connectCoaQuickUrl()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs whitespace-nowrap shadow-md shadow-blue-500/20 transition-all">
+                Hubungkan
               </button>
             </div>
           </div>
@@ -884,117 +901,252 @@
 
       <div class="flex-1 overflow-y-auto bg-black/40 rounded-xl p-3.5 font-mono text-[11px] text-slate-300 select-all border border-white/10">
         <pre id="gasSourceCode">/**
- * ExpenseFlow Astra SO 2021 - Google Apps Script Backend (kode.gs)
- * Aligned with COA Operating Expenses SO 2021 ASTRA
+ * ==============================================================================
+ * ExpenseFlow Astra SO 2021 — Google Apps Script Backend (kode.gs)
+ * ==============================================================================
+ * Backend REST API Sinkronisasi Realtime Master COA & Transaksi Opex Astra SO
+ * Terhubung langsung ke Google Spreadsheet ID: 1wLDVXInlhwaaFr9Hs7uIN2VuPlwIkKED2G9ejFn7Tik
  */
-const API_TOKEN = "astra-secret-token-2026"; // Sesuaikan dengan token di aplikasi frontend
-const SHEET_NAME = "OpexLedger_SO2021";
 
-function doPost(e) {
-  try {
-    const postData = JSON.parse(e.postData.contents);
-    if (postData.token !== API_TOKEN) {
-      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Unauthorized token" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName(SHEET_NAME);
-    if (!sheet) {
-      sheet = ss.insertSheet(SHEET_NAME);
-      // Kolom Header sesuai database Astra SO 2021
-      sheet.appendRow([
-        "Timestamp",
-        "ID_Transaksi",
-        "Tanggal",
-        "No_Ref",
-        "Kode_COA",
-        "Nama_Akun",
-        "Kategori_COA",
-        "Cost_Center",
-        "Keterangan",
-        "Nominal",
-        "Sumber_Dana",
-        "Operator"
-      ]);
-    }
-    
-    if (postData.action === "ADD_TRANSACTION") {
-      const item = postData.payload;
-      sheet.appendRow([
-        new Date(),
-        item.id,
-        item.date,
-        item.ref,
-        item.coa,
-        item.coaName,
-        item.category,
-        item.costCenter || "CC-720 General Admin",
-        item.desc,
-        item.amount,
-        item.source,
-        item.operator || "Operator SO"
-      ]);
-      return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "Tercatat di Sheet Astra SO" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+const SECRET_TOKEN = "astra-secret-token-2026";
+const SPREADSHEET_ID = "1wLDVXInlhwaaFr9Hs7uIN2VuPlwIkKED2G9ejFn7Tik"; 
+const MASTER_COA_SHEET = "COA OPEX 2021 Presisi Full"; 
+const TRANSACTION_SHEET = "Transaksi_Beban";
+
+function createJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getSpreadsheet() {
+  if (SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") {
+    return SpreadsheetApp.openById(SPREADSHEET_ID.trim());
   }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+function getOrCreateTransactionSheet() {
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(TRANSACTION_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(TRANSACTION_SHEET);
+    const headers = [
+      "Timestamp", "ID_Transaksi", "Tanggal", "No_Ref", "Kode_COA",
+      "Nama_Akun", "Kategori_COA", "Cost_Center", "Keterangan",
+      "Nominal", "Status_Pajak", "Sumber_Dana", "Operator"
+    ];
+    sheet.appendRow(headers);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground("#1e3a8a");
+    headerRange.setFontColor("#ffffff");
+    headerRange.setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function getMasterCOAList() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(MASTER_COA_SHEET);
+  if (!sheet) return [];
+
+  // PENTING: getDisplayValues() mempertahankan format asli teks (titik, digit nol di depan)
+  const values = sheet.getDataRange().getDisplayValues();
+  if (values.length <= 1) return [];
+
+  const coaList = [];
+  let currentBabCode = "";
+  let currentBabName = "";
+  let currentSubBabCode = "";
+  let currentSubBabName = "";
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const isRowEmpty = row.every(cell => !cell || String(cell).trim() === "");
+    if (isRowEmpty) continue;
+
+    const rawBabCode = String(row[0] || "").trim();
+    const rawBabName = String(row[1] || "").trim();
+    const rawSubBabCode = String(row[2] || "").trim();
+    const rawSubBabName = String(row[3] || "").trim();
+    const rawSubSubBabCode = String(row[4] || "").trim();
+    const rawSubSubBabName = String(row[5] || "").trim();
+    const detailPenjelasan = String(row[6] || "").trim();
+    const contohRedaksi = String(row[7] || "").trim();
+    const statusPajak = String(row[8] || "-").trim();
+    const catatanPosting = String(row[9] || "").trim();
+
+    if (rawBabCode.toLowerCase() === "kode bab" || rawSubBabCode.toLowerCase() === "kode sub-bab") {
+      continue;
+    }
+
+    if (rawBabCode && rawBabCode !== "-") {
+      currentBabCode = rawBabCode;
+      currentBabName = rawBabName || currentBabName;
+      currentSubBabCode = "";
+      currentSubBabName = "";
+    }
+
+    if (rawSubBabCode && rawSubBabCode !== "-") {
+      currentSubBabCode = rawSubBabCode;
+      currentSubBabName = rawSubBabName || currentSubBabName;
+    }
+
+    let kodeCOA = "";
+    let namaAkun = "";
+
+    if (rawSubSubBabCode && rawSubSubBabCode !== "-") {
+      kodeCOA = rawSubSubBabCode;
+      namaAkun = rawSubSubBabName || currentSubBabName || currentBabName;
+    } else if (rawSubBabCode && rawSubBabCode !== "-") {
+      kodeCOA = rawSubBabCode;
+      namaAkun = rawSubBabName || currentBabName;
+    } else if (rawBabCode && rawBabCode !== "-") {
+      kodeCOA = rawBabCode;
+      namaAkun = rawBabName;
+    } else if (currentSubBabCode) {
+      kodeCOA = currentSubBabCode;
+      namaAkun = currentSubBabName;
+    } else if (currentBabCode) {
+      kodeCOA = currentBabCode;
+      namaAkun = currentBabName;
+    }
+
+    if (!kodeCOA) continue;
+
+    coaList.push({
+      kodeCOA: kodeCOA,
+      namaAkun: namaAkun,
+      kodeBab: currentBabCode || rawBabCode,
+      kategoriBab: currentBabName || rawBabName,
+      kodeSubBab: currentSubBabCode || rawSubBabCode,
+      namaSubBab: currentSubBabName || rawSubBabName,
+      kodeSubSubBab: rawSubSubBabCode,
+      namaSubSubBab: rawSubSubBabName,
+      detailPenjelasan: detailPenjelasan,
+      contohRedaksi: contohRedaksi,
+      statusPajak: statusPajak || "-",
+      catatanPosting: catatanPosting
+    });
+  }
+
+  return coaList;
 }
 
 function doGet(e) {
   try {
-    const action = e.parameter.action;
-    
-    // Tarik seluruh baris data dari Google Sheet ke Frontend
+    const params = e ? e.parameter : {};
+    const action = params.action;
+
+    if (action === "GET_MASTER_COA" || action === "GET_COA") {
+      const coaData = getMasterCOAList();
+      return createJsonResponse({
+        status: "success",
+        total: coaData.length,
+        data: coaData
+      });
+    }
+
     if (action === "GET_TRANSACTIONS") {
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const sheet = ss.getSheetByName(SHEET_NAME);
-      if (!sheet) {
-        return ContentService.createTextOutput(JSON.stringify({ status: "success", data: [] }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-      
+      const ss = getSpreadsheet();
+      const sheet = ss.getSheetByName(TRANSACTION_SHEET);
+      if (!sheet) return createJsonResponse({ status: "success", total: 0, data: [] });
+
       const values = sheet.getDataRange().getValues();
-      if (values.length <= 1) {
-        return ContentService.createTextOutput(JSON.stringify({ status: "success", data: [] }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-      
-      const rows = [];
+      if (values.length <= 1) return createJsonResponse({ status: "success", total: 0, data: [] });
+
+      const transactions = [];
       for (let i = 1; i < values.length; i++) {
         const row = values[i];
         if (row[1]) {
-          rows.push({
+          transactions.push({
             id: String(row[1]),
-            date: row[2] ? Utilities.formatDate(new Date(row[2]), "GMT+7", "yyyy-MM-dd") : "",
+            date: row[2] instanceof Date ? Utilities.formatDate(row[2], "GMT+7", "yyyy-MM-dd") : String(row[2] || ""),
             ref: String(row[3] || ""),
             coa: String(row[4] || ""),
             coaName: String(row[5] || ""),
             category: String(row[6] || ""),
-            costCenter: String(row[7] || ""),
+            costCenter: String(row[7] || "CC-720 General Admin"),
             desc: String(row[8] || ""),
             amount: Number(row[9] || 0),
-            source: String(row[10] || ""),
-            operator: String(row[11] || ""),
+            taxStatus: String(row[10] || "-"),
+            source: String(row[11] || "Petty Cash"),
+            operator: String(row[12] || ""),
             status: "POSTED"
           });
         }
       }
-      return ContentService.createTextOutput(JSON.stringify({ status: "success", data: rows }))
-        .setMimeType(ContentService.MimeType.JSON);
+      transactions.reverse();
+      return createJsonResponse({ status: "success", total: transactions.length, data: transactions });
     }
-    
-    return ContentService.createTextOutput(JSON.stringify({ 
+
+    const coaCount = getMasterCOAList().length;
+    return createJsonResponse({ 
       status: "online", 
-      system: "ExpenseFlow Astra SO 2021 Backend",
-      version: "2.2-Astra"
-    })).setMimeType(ContentService.MimeType.JSON);
+      system: "ExpenseFlow Astra SO 2021 Backend", 
+      version: "2.5-RealtimeSync",
+      totalMasterCOA: coaCount,
+      endpoints: {
+        getCOA: "?action=GET_MASTER_COA",
+        getTransactions: "?action=GET_TRANSACTIONS"
+      },
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonResponse({ status: "error", message: "Server Error: " + err.toString() });
+  }
+}
+
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return createJsonResponse({ status: "error", message: "No payload provided" });
+    }
+    const postData = JSON.parse(e.postData.contents);
+    if (!postData.token || postData.token !== SECRET_TOKEN) {
+      return createJsonResponse({ status: "error", message: "Akses ditolak: Token autentikasi tidak valid!" });
+    }
+
+    if (postData.action === "ADD_TRANSACTION") {
+      const item = postData.payload || {};
+      const sheet = getOrCreateTransactionSheet();
+
+      let finalCoaName = item.coaName || "";
+      let finalCategory = item.category || "";
+      let finalTaxStatus = item.taxStatus || "-";
+
+      if ((!finalCoaName || !finalCategory) && item.coa) {
+        const masterList = getMasterCOAList();
+        const matched = masterList.find(c => c.kodeCOA === String(item.coa).trim());
+        if (matched) {
+          finalCoaName = finalCoaName || matched.namaAkun;
+          finalCategory = finalCategory || matched.kategoriBab;
+          finalTaxStatus = matched.statusPajak;
+        }
+      }
+
+      sheet.appendRow([
+        new Date(),
+        item.id || Utilities.getUuid(),
+        item.date || "",
+        item.ref || "",
+        String(item.coa || ""),
+        finalCoaName,
+        finalCategory,
+        item.costCenter || "CC-720 General Admin",
+        item.desc || "",
+        Number(item.amount || 0),
+        finalTaxStatus,
+        item.source || "Petty Cash",
+        item.operator || "Operator SO"
+      ]);
+
+      return createJsonResponse({ status: "success", message: "Transaksi berhasil dicatat ke Google Sheets!" });
+    }
+
+    return createJsonResponse({ status: "error", message: "Aksi tidak dikenali: " + postData.action });
+  } catch (err) {
+    return createJsonResponse({ status: "error", message: "Gagal memproses POST: " + err.toString() });
   }
 }</pre>
       </div>
