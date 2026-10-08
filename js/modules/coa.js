@@ -238,7 +238,10 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
   const filteredList = rawList.filter(row => {
     if (babFilter !== 'ALL') {
       const rowBab = String(row.kodeBab || '').trim();
-      if (!rowBab.startsWith(babFilter)) return false;
+      if (babFilter === '700' && !rowBab.startsWith('70')) return false;
+      if (babFilter === '710' && !rowBab.startsWith('71')) return false;
+      if (babFilter === '720' && !(rowBab.startsWith('72') || rowBab.startsWith('73') || rowBab.startsWith('74') || rowBab.startsWith('79'))) return false;
+      if (!['700', '710', '720'].includes(babFilter) && !rowBab.startsWith(babFilter)) return false;
     }
 
     if (kw === '') return true;
@@ -576,8 +579,12 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
   const db = window.appState.masterCoaTree || window.astraCoaDatabase || [];
 
   const html = db.map(group => {
-    if (babFilter !== 'ALL' && !group.groupCode.startsWith(babFilter)) {
-      return '';
+    if (babFilter !== 'ALL') {
+      const gCode = String(group.groupCode || '').trim();
+      if (babFilter === '700' && !gCode.startsWith('70')) return '';
+      if (babFilter === '710' && !gCode.startsWith('71')) return '';
+      if (babFilter === '720' && !(gCode.startsWith('72') || gCode.startsWith('73') || gCode.startsWith('74') || gCode.startsWith('79'))) return '';
+      if (!['700', '710', '720'].includes(babFilter) && !gCode.startsWith(babFilter)) return '';
     }
 
     const colorClasses = {

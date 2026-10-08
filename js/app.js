@@ -47,7 +47,7 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Kamus Master COA Astra SO';
     if (subEl) subEl.textContent = 'Master COA Opex 2021 Presisi Full • Standar Astra Sales Operation';
     if (typeof renderCoaView === 'function') renderCoaView();
-    if (typeof fetchFromGoogleSheets === 'function' && StorageManager.getGasUrl()) {
+    if (typeof fetchFromGoogleSheets === 'function') {
       fetchFromGoogleSheets(false);
     }
   } else if (viewKey === 'approvals') {
@@ -103,14 +103,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   renderApprovalQueue();
 
-  // 5. Automatic Live Sync with Google Apps Script if configured
-  if (savedGas) {
+  // 5. Automatic Live Sync with Google Sheets (GViz Realtime & Apps Script)
+  if (typeof fetchFromGoogleSheets === 'function') {
     fetchFromGoogleSheets(false);
   }
 
   // 6. Periodic Background Sync (Realtime update setiap 45 detik)
   setInterval(() => {
-    if (typeof fetchFromGoogleSheets === 'function' && StorageManager.getGasUrl()) {
+    if (typeof fetchFromGoogleSheets === 'function') {
       fetchFromGoogleSheets(false);
     }
   }, 45000);

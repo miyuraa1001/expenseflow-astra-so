@@ -136,12 +136,93 @@ function toggleGasConfigCollapsible() {
   }
 }
 
+const SPREADSHEET_ID = "1wLDVXInlhwaaFr9Hs7uIN2VuPlwIkKED2G9ejFn7Tik";
+const MASTER_COA_SHEET = "COA OPEX 2021 Presisi Full";
+const GVIZ_COA_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(MASTER_COA_SHEET)}`;
+
+async function fetchDirectGvizCoa() {
+  try {
+    const res = await fetch(GVIZ_COA_URL);
+    if (!res.ok) return null;
+    const text = await res.text();
+    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+)\);/);
+    if (!match) return null;
+    const json = JSON.parse(match[1]);
+    const rows = json.table && json.table.rows;
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+
+    let currentBabCode = '';
+    let currentBabName = '';
+    let currentSubBabCode = '';
+    let currentSubBabName = '';
+    const parsedList = [];
+
+    rows.forEach(r => {
+      const c = r.c || [];
+      const val = idx => (c[idx] && c[idx].v !== null && c[idx].v !== undefined) ? String(c[idx].v).trim() : '';
+
+      const rawBabCode = val(0);
+      const rawBabName = val(1);
+      const rawSubCode = val(2);
+      const rawSubName = val(3);
+      const rawSubSubCode = val(4);
+      const rawSubSubName = val(5);
+      const detail = val(6);
+      const example = val(7);
+      const tax = val(8);
+      const note = val(9);
+
+      if (rawBabCode && rawBabCode !== '-') {
+        currentBabCode = rawBabCode;
+        currentBabName = rawBabName || currentBabName;
+        currentSubBabCode = '';
+        currentSubBabName = '';
+      }
+      if (rawSubCode && rawSubCode !== '-') {
+        currentSubBabCode = rawSubCode;
+        currentSubBabName = rawSubName || currentSubBabName;
+      }
+
+      let kodeCOA = '';
+      let namaAkun = '';
+      if (rawSubSubCode && rawSubSubCode !== '-') {
+        kodeCOA = rawSubSubCode;
+        namaAkun = rawSubSubName || currentSubBabName || currentBabName;
+      } else if (rawSubCode && rawSubCode !== '-') {
+        kodeCOA = rawSubCode;
+        namaAkun = rawSubName || currentBabName;
+      } else if (rawBabCode && rawBabCode !== '-') {
+        kodeCOA = rawBabCode;
+        namaAkun = rawBabName;
+      }
+
+      if (!kodeCOA) return;
+
+      parsedList.push({
+        kodeCOA,
+        namaAkun,
+        kodeBab: currentBabCode || rawBabCode,
+        kategoriBab: currentBabName || rawBabName,
+        kodeSubBab: currentSubBabCode || rawSubCode,
+        namaSubBab: currentSubBabName || rawSubName,
+        kodeSubSubBab: rawSubSubCode,
+        namaSubSubBab: rawSubSubName,
+        detailPenjelasan: detail,
+        contohRedaksi: example,
+        statusPajak: tax || '-',
+        catatanPosting: note
+      });
+    });
+
+    return parsedList;
+  } catch (err) {
+    console.warn('Direct GViz fetch error:', err);
+    return null;
+  }
+}
+
 async function fetchFromGoogleSheets(showNotification = true) {
   const url = StorageManager.getGasUrl();
-  if (!url) {
-    updateCoaLiveStatusUi();
-    return;
-  }
 
   const syncIcon = document.getElementById('syncIconSvg');
   const accSyncIcon = document.getElementById('accSyncIcon');
@@ -159,30 +240,43 @@ async function fetchFromGoogleSheets(showNotification = true) {
   let coaSuccess = false;
 
   try {
-    const fetchTxUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_TRANSACTIONS';
-    const fetchCoaUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_MASTER_COA';
+    if (url) {
+      const fetchTxUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_TRANSACTIONS';
+      const fetchCoaUrl = url + (url.includes('?') ? '&' : '?') + 'action=GET_MASTER_COA';
 
-    // Eksekusi paralel untuk memangkas waktu loading 50%
-    const [resTxSettled, resCoaSettled] = await Promise.allSettled([
-      fetch(fetchTxUrl).then(r => r.json()),
-      fetch(fetchCoaUrl).then(r => r.json())
-    ]);
+      const [resTxSettled, resCoaSettled] = await Promise.allSettled([
+        fetch(fetchTxUrl).then(r => r.json()),
+        fetch(fetchCoaUrl).then(r => r.json())
+      ]);
 
-    // 1. Proses Data Transaksi
-    if (resTxSettled.status === 'fulfilled' && resTxSettled.value && resTxSettled.value.status === 'success' && Array.isArray(resTxSettled.value.data)) {
-      window.appState.transactions = resTxSettled.value.data;
-      StorageManager.saveTransactions(window.appState.transactions);
-      renderDashboard();
-      txSuccess = true;
+      if (resTxSettled.status === 'fulfilled' && resTxSettled.value && resTxSettled.value.status === 'success' && Array.isArray(resTxSettled.value.data)) {
+        window.appState.transactions = resTxSettled.value.data;
+        StorageManager.saveTransactions(window.appState.transactions);
+        renderDashboard();
+        txSuccess = true;
+      }
+
+      if (resCoaSettled.status === 'fulfilled' && resCoaSettled.value && resCoaSettled.value.status === 'success' && Array.isArray(resCoaSettled.value.data) && resCoaSettled.value.data.length > 0) {
+        window.appState.masterCoa = resCoaSettled.value.data;
+        StorageManager.saveMasterCoa(window.appState.masterCoa);
+        if (typeof updateCoaFromData === 'function') {
+          updateCoaFromData(window.appState.masterCoa, resCoaSettled.value.tree || null);
+        }
+        coaSuccess = true;
+      }
     }
 
-    // 2. Proses Data Master COA
-    if (resCoaSettled.status === 'fulfilled' && resCoaSettled.value && resCoaSettled.value.status === 'success' && Array.isArray(resCoaSettled.value.data) && resCoaSettled.value.data.length > 0) {
-      StorageManager.saveMasterCoa(resCoaSettled.value.data);
-      if (typeof updateCoaFromData === 'function') {
-        updateCoaFromData(resCoaSettled.value.data, resCoaSettled.value.tree || null);
+    // Jika COA belum berhasil ditarik via Apps Script (atau URL belum diset), tarik langsung via Google Spreadsheet GViz (Live Public)
+    if (!coaSuccess) {
+      const gvizData = await fetchDirectGvizCoa();
+      if (Array.isArray(gvizData) && gvizData.length > 0) {
+        window.appState.masterCoa = gvizData;
+        StorageManager.saveMasterCoa(gvizData);
+        if (typeof updateCoaFromData === 'function') {
+          updateCoaFromData(gvizData);
+        }
+        coaSuccess = true;
       }
-      coaSuccess = true;
     }
 
     const dot = document.getElementById('sidebarSyncDot');
@@ -194,13 +288,11 @@ async function fetchFromGoogleSheets(showNotification = true) {
 
     if (showNotification) {
       if (txSuccess && coaSuccess) {
-        showToast(`Sinkronisasi sukses: ${window.appState.transactions.length} transaksi & seluruh akun COA termuat lengkap!`, 'success');
-      } else if (txSuccess) {
-        showToast(`Berhasil memuat ${window.appState.transactions.length} transaksi dari Google Sheets!`, 'success');
+        showToast(`Sinkronisasi sukses: ${window.appState.transactions.length} transaksi & ${window.appState.masterCoa.length} akun COA termuat lengkap!`, 'success');
       } else if (coaSuccess) {
         showToast(`Berhasil memuat ${window.appState.masterCoa.length} akun Master COA langsung dari Google Sheets!`, 'success');
-      } else {
-        showToast('Respons diterima dari backend Google Sheets.', 'info');
+      } else if (txSuccess) {
+        showToast(`Berhasil memuat ${window.appState.transactions.length} transaksi dari Google Sheets!`, 'success');
       }
     }
   } catch (err) {
