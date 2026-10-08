@@ -1,16 +1,23 @@
 /**
  * js/modules/coa.js
  * Chart of Accounts (COA) Master Database Renderer & Controller
- * Mendukung Tampilan Tabel Database Presisi 10-Kolom (Google Sheet COA OPEX 2021 Presisi Full)
- * serta Tampilan Pohon Hierarki & Integrasi ke Form Catat Beban
+ * Mendukung Tampilan Tabel Database Presisi 10-Kolom yang Cepat, Mulus,
+ * Dilengkapi Paginasi Ringan (Bebas Crash), Expandable Details, Debounced Search,
+ * serta Integrasi Cepat ke Form Pencatatan Beban
  */
 
 // State internal tampilan Kamus COA
 const coaViewState = {
-  mode: 'table',       // 'table' (default) atau 'tree'
+  mode: 'table',          // 'table' (default) atau 'tree'
   keyword: '',
-  activeBab: 'ALL'     // 'ALL', '700', '710', '720'
+  activeBab: 'ALL',        // 'ALL', '700', '710', '720'
+  page: 1,
+  pageSize: 25,           // 25, 50, 100, atau 9999 (Semua)
+  expandedIndices: new Set() // Set of indices yang sedang terbuka detailnya
 };
+
+let coaSearchDebounceTimer = null;
+let currentRenderedRows = [];
 
 /**
  * Mengambil daftar data flat COA (dari Google Sheets cache atau database baku Astra)
@@ -27,12 +34,10 @@ function getActiveCoaFlatList() {
 
 /**
  * Mengubah flat list dari Google Spreadsheet menjadi hierarki pohon COA bertingkat
- * (BAB -> Sub-Bab -> Akun Leaf)
  */
 function buildCoaTreeFromFlatList(flatList) {
   if (!Array.isArray(flatList) || flatList.length === 0) return null;
 
-  // Pass 1: Identifikasi Sub-Bab yang memiliki anak Sub-Sub-Bab
   const subBabsWithChildren = new Set();
   flatList.forEach(item => {
     const subSub = item.kodeSubSubBab && String(item.kodeSubSubBab).trim() !== '-' ? String(item.kodeSubSubBab).trim() : '';
@@ -44,7 +49,6 @@ function buildCoaTreeFromFlatList(flatList) {
 
   const babGroups = {};
 
-  // Pass 2: Bangun kelompok BAB, Sub-Bab, dan Akun Leaf
   flatList.forEach(item => {
     const rawBabCode = String(item.kodeBab || '').trim();
     const rawBabName = String(item.kategoriBab || '').trim();
@@ -53,7 +57,6 @@ function buildCoaTreeFromFlatList(flatList) {
     const rawSubSubCode = String(item.kodeSubSubBab || '').trim();
     const rawSubSubName = String(item.namaSubSubBab || '').trim();
 
-    // Lewati baris header BAB murni tanpa sub-bab
     if ((!rawSubBabCode || rawSubBabCode === '-') && (!rawSubSubCode || rawSubSubCode === '-')) {
       return;
     }
@@ -82,7 +85,6 @@ function buildCoaTreeFromFlatList(flatList) {
       };
     }
 
-    // Tentukan kode dan nama akun leaf yang valid
     let accCode = '';
     let accName = '';
 
@@ -134,6 +136,8 @@ function updateCoaFromData(coaList, coaTree = null) {
     window.appState.masterCoaTree = buildCoaTreeFromFlatList(coaList);
   }
 
+  coaViewState.page = 1;
+  coaViewState.expandedIndices.clear();
   renderCoaView();
   populateCoaDropdown(coaList);
 }
@@ -149,10 +153,8 @@ function populateCoaDropdown(coaList) {
   const currentValue = selectEl.value;
 
   if (flatList.length > 0) {
-    // Bangun optgroup berdasarkan BAB dari flat list
     const babGroups = {};
     flatList.forEach(item => {
-      // Hanya masukkan akun yang bisa diposting (Sub-Sub-Bab ada atau Sub-Bab tanpa sub-sub)
       let code = '';
       let name = '';
       if (item.kodeSubSubBab && item.kodeSubSubBab !== '-') {
@@ -189,7 +191,6 @@ function populateCoaDropdown(coaList) {
     return;
   }
 
-  // Fallback ke Master Tree jika ada
   const tree = window.appState.masterCoaTree || window.astraCoaDatabase;
   if (!tree || tree.length === 0) return;
 
@@ -209,7 +210,7 @@ function populateCoaDropdown(coaList) {
 }
 
 /**
- * Render Kamus COA Utama (memilih antara Table View atau Tree View)
+ * Render Kamus COA Utama
  */
 function renderCoaView() {
   const container = document.getElementById('coaMainContainer') || document.getElementById('coaTreeContainer');
@@ -223,21 +224,19 @@ function renderCoaView() {
 }
 
 /**
- * Render Tampilan Tabel Database Presisi (Sesuai 10 Kolom Google Sheet COA Astra SO)
+ * Render Tampilan Tabel Database Interaktif & Ringan (Paginasi 25 Baris, Bebas Freeze/Crash)
  */
 function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
   const kw = (filterKeyword || '').toLowerCase().trim();
   const rawList = getActiveCoaFlatList();
 
-  // Filter berdasarkan BAB dan Kata Kunci
+  // 1. Filter Data
   const filteredList = rawList.filter(row => {
-    // 1. Filter BAB
     if (babFilter !== 'ALL') {
       const rowBab = String(row.kodeBab || '').trim();
       if (!rowBab.startsWith(babFilter)) return false;
     }
 
-    // 2. Filter Keyword
     if (kw === '') return true;
 
     return (
@@ -254,6 +253,8 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
     );
   });
 
+  currentRenderedRows = filteredList;
+
   if (filteredList.length === 0) {
     container.innerHTML = `
       <div class="p-12 text-center glass-panel rounded-2xl space-y-3">
@@ -266,24 +267,42 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
     return;
   }
 
-  // Bangun Tabel Presisi 10 Kolom
-  const tableRowsHtml = filteredList.map((row, idx) => {
+  // 2. Hitung Paginasi
+  const totalItems = filteredList.length;
+  const pageSize = coaViewState.pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  
+  if (coaViewState.page > totalPages) {
+    coaViewState.page = totalPages;
+  }
+  const currentPage = coaViewState.page;
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(totalItems, startIndex + pageSize);
+  const pageItems = filteredList.slice(startIndex, endIndex);
+
+  // 3. Render Baris-baris Tabel
+  const tableRowsHtml = pageItems.map((row, idxOnPage) => {
+    const globalIdx = startIndex + idxOnPage;
     const isBabHeader = (!row.kodeSubBab || row.kodeSubBab === '-') && (!row.kodeSubSubBab || row.kodeSubSubBab === '-');
     const isSubBabHeader = row.kodeSubBab && row.kodeSubBab !== '-' && (!row.kodeSubSubBab || row.kodeSubSubBab === '-') && String(row.catatanPosting || '').toLowerCase().includes('sub-bab');
     const isLeaf = (row.kodeSubSubBab && row.kodeSubSubBab !== '-') || (!isBabHeader && !isSubBabHeader);
 
-    // Tentukan kode posting aktif jika akun ini adalah leaf
     const postingCode = (row.kodeSubSubBab && row.kodeSubSubBab !== '-') ? row.kodeSubSubBab : (row.kodeSubBab && row.kodeSubBab !== '-' ? row.kodeSubBab : '');
     const postingName = (row.namaSubSubBab && row.namaSubSubBab !== '-') ? row.namaSubSubBab : (row.namaSubBab && row.namaSubBab !== '-' ? row.namaSubBab : row.kategoriBab);
 
-    // Pewarnaan baris
-    let rowClass = 'hover:bg-blue-500/5 transition-colors border-b border-slate-200/40 dark:border-white/5';
-    if (isBabHeader) {
-      rowClass = 'bg-slate-100/70 dark:bg-white/5 font-semibold border-b border-slate-200/70 dark:border-white/10';
+    const isExpanded = coaViewState.expandedIndices.has(globalIdx);
+
+    // Kategori BAB Pill Theme
+    const babCode = String(row.kodeBab || '720').trim();
+    let babBadgeColor = 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+    if (babCode.startsWith('70')) {
+      babBadgeColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+    } else if (babCode.startsWith('71')) {
+      babBadgeColor = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20';
     }
 
-    // Badge status pajak
-    let taxBadge = `<span class="text-slate-400 dark:text-slate-500">-</span>`;
+    // Badge Pajak
+    let taxBadge = `<span class="text-slate-400 text-[10px]">-</span>`;
     const tax = String(row.statusPajak || '').trim();
     if (tax && tax !== '-') {
       if (tax.toLowerCase().includes('bukan') || tax.toLowerCase().includes('non')) {
@@ -297,99 +316,238 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
       }
     }
 
-    // Badge posting
+    // Badge Posting / Tipe
     let postingBadge = `<span class="text-slate-400 text-[10px]">-</span>`;
     const posting = String(row.catatanPosting || '').trim();
     if (posting) {
       if (posting.includes('Category') || isBabHeader) {
         postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">BAB Header</span>`;
       } else if (posting.includes('SAP-HR')) {
-        postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-500 border border-sky-500/20 whitespace-nowrap">${posting}</span>`;
+        postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-500 border border-sky-500/20 whitespace-nowrap">SAP-HR</span>`;
       } else if (isSubBabHeader) {
         postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-500/10 text-slate-500 border border-slate-500/20">Sub-Bab</span>`;
       } else {
-        postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">${posting}</span>`;
+        postingBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">Opex Leaf</span>`;
       }
     }
 
-    // Tombol Aksi
-    let actionButtons = '';
-    if (isLeaf && postingCode) {
-      actionButtons = `
-        <div class="flex items-center gap-1.5 justify-end">
-          <button 
-            type="button" 
-            onclick="useCoaInTransaction('${postingCode}', '${postingName.replace(/'/g, "\\'")}', '${(row.detailPenjelasan || '').replace(/'/g, "\\'")}', '${tax}')" 
-            title="Gunakan akun ini untuk mencatat beban"
-            class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-all shadow-sm flex items-center gap-1"
-          >
-            <span>Gunakan</span>
-          </button>
-          <button 
-            type="button" 
-            onclick="copyCoaCode('${postingCode}')" 
-            title="Salin kode COA" 
-            class="p-1 rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 013 20.625V7.875c0-.621.504-1.125 1.125-1.125H7.5m8.25 10.375l3.75-3.75m0 0l-3.75-3.75m3.75 3.75H10.5"/></svg>
-          </button>
-        </div>
+    // Row Background Styling
+    let rowBg = 'hover:bg-blue-500/5 transition-all border-b border-slate-200/40 dark:border-white/5';
+    if (isBabHeader) {
+      rowBg = 'bg-slate-100/70 dark:bg-white/5 font-semibold border-b border-slate-200/70 dark:border-white/10';
+    } else if (isExpanded) {
+      rowBg = 'bg-blue-500/10 dark:bg-blue-500/15 border-b border-blue-500/30';
+    }
+
+    // Detail Expand Content (Hanya render jika dibuka untuk hemat memori)
+    let expandedDrawerHtml = '';
+    if (isExpanded) {
+      expandedDrawerHtml = `
+        <tr class="bg-blue-500/5 dark:bg-blue-500/10 border-b border-blue-500/20 animate-fadeIn">
+          <td colspan="7" class="p-4 sm:p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+              <!-- Detail Penjelasan & Coverage -->
+              <div class="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-1.5 shadow-sm">
+                <div class="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                  <span>Detail Penjelasan & Cakupan Beban</span>
+                </div>
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                  ${row.detailPenjelasan && row.detailPenjelasan !== '-' ? row.detailPenjelasan : 'Tidak ada catatan penjelasan khusus.'}
+                </p>
+                <div class="pt-2 flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+                  <span>Sub-Bab: <strong>${row.namaSubBab || '-'}</strong> (${row.kodeSubBab || '-'})</span>
+                </div>
+              </div>
+
+              <!-- Contoh Redaksi Teks & Catatan Posting -->
+              <div class="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-2 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    <span>Contoh Redaksi Teks Voucher / BPH Baku</span>
+                  </div>
+                  <p class="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-500/5 dark:bg-blue-500/15 p-2 rounded-lg border border-blue-500/20">
+                    ${row.contohRedaksi && row.contohRedaksi !== '-' ? `"${row.contohRedaksi}"` : 'Format redaksi bebas sesuai transaksi operasional cabang.'}
+                  </p>
+                </div>
+                
+                <div class="flex items-center justify-between pt-1 text-[11px]">
+                  <span class="text-slate-500 font-mono">Status Pajak: <strong>${row.statusPajak || '-'}</strong></span>
+                  ${postingCode ? `
+                    <button 
+                      type="button" 
+                      onclick="useCoaRow(${globalIdx})" 
+                      class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                      <span>Catat Beban dengan Akun Ini</span>
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
       `;
     }
 
     return `
-      <tr class="${rowClass}">
-        <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-400 select-none">${idx + 1}</td>
-        <td class="py-3 px-3 font-mono font-bold text-xs text-slate-900 dark:text-white whitespace-nowrap">${row.kodeBab || '-'}</td>
-        <td class="py-3 px-3 font-semibold text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap">${row.kategoriBab || '-'}</td>
-        <td class="py-3 px-3 font-mono text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">${row.kodeSubBab && row.kodeSubBab !== '-' ? row.kodeSubBab : '<span class="text-slate-300 dark:text-slate-600">-</span>'}</td>
-        <td class="py-3 px-3 text-xs text-slate-700 dark:text-slate-300 whitespace-nowrap">${row.namaSubBab && row.namaSubBab !== '-' ? row.namaSubBab : '<span class="text-slate-300 dark:text-slate-600">-</span>'}</td>
-        <td class="py-3 px-3 font-mono font-bold text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">${row.kodeSubSubBab && row.kodeSubSubBab !== '-' ? row.kodeSubSubBab : '<span class="text-slate-300 dark:text-slate-600">-</span>'}</td>
-        <td class="py-3 px-3 font-semibold text-xs text-slate-900 dark:text-white whitespace-nowrap">${row.namaSubSubBab && row.namaSubSubBab !== '-' ? row.namaSubSubBab : '<span class="text-slate-300 dark:text-slate-600">-</span>'}</td>
-        <td class="py-3 px-3 text-xs text-slate-600 dark:text-slate-300 min-w-[240px] max-w-[360px] leading-relaxed">
-          ${row.detailPenjelasan && row.detailPenjelasan !== '-' ? row.detailPenjelasan : '<span class="text-slate-400">-</span>'}
+      <tr class="${rowBg} cursor-pointer group" onclick="toggleCoaRowDetail(${globalIdx})">
+        <!-- 1. No -->
+        <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-400 select-none">${globalIdx + 1}</td>
+        
+        <!-- 2. Kode Akun -->
+        <td class="py-3 px-3 font-mono font-bold text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">
+          <div class="flex items-center gap-1.5">
+            <span>${postingCode || row.kodeBab || '-'}</span>
+            ${postingCode ? `
+              <button 
+                type="button" 
+                onclick="event.stopPropagation(); copyCoaCode('${postingCode}')" 
+                title="Salin kode" 
+                class="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-400 hover:text-blue-500 transition-opacity"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 013 20.625V7.875c0-.621.504-1.125 1.125-1.125H7.5m8.25 10.375l3.75-3.75m0 0l-3.75-3.75m3.75 3.75H10.5"/></svg>
+              </button>
+            ` : ''}
+          </div>
         </td>
-        <td class="py-3 px-3 text-[11px] font-mono text-slate-500 dark:text-slate-400 min-w-[200px] max-w-[300px]">
-          ${row.contohRedaksi && row.contohRedaksi !== '-' ? `"${row.contohRedaksi}"` : '<span class="text-slate-400">-</span>'}
+
+        <!-- 3. Nama Akun -->
+        <td class="py-3 px-3 text-xs text-slate-900 dark:text-white font-medium min-w-[200px]">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">${postingName}</span>
+            ${row.detailPenjelasan && row.detailPenjelasan !== '-' ? `
+              <span class="text-[10px] text-slate-400 font-normal hidden lg:inline truncate max-w-[220px]">
+                &bull; ${row.detailPenjelasan}
+              </span>
+            ` : ''}
+          </div>
         </td>
-        <td class="py-3 px-3 text-center">${taxBadge}</td>
-        <td class="py-3 px-3 text-center">${postingBadge}</td>
-        <td class="py-3 px-3 text-right whitespace-nowrap">${actionButtons}</td>
+
+        <!-- 4. Kategori BAB -->
+        <td class="py-3 px-3 whitespace-nowrap">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${babBadgeColor}">
+            BAB ${row.kodeBab || '-'}
+          </span>
+        </td>
+
+        <!-- 5. Status Pajak -->
+        <td class="py-3 px-3 text-center whitespace-nowrap">${taxBadge}</td>
+
+        <!-- 6. Catatan Sistem -->
+        <td class="py-3 px-3 text-center whitespace-nowrap">${postingBadge}</td>
+
+        <!-- 7. Aksi Interaktif -->
+        <td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+          <div class="flex items-center gap-1.5 justify-end">
+            ${isLeaf && postingCode ? `
+              <button 
+                type="button" 
+                onclick="useCoaRow(${globalIdx})" 
+                class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-all shadow-sm flex items-center gap-1 active:scale-95"
+                title="Gunakan akun ini untuk formulir Catat Beban"
+              >
+                <span>Gunakan</span>
+              </button>
+            ` : ''}
+            
+            <button 
+              type="button" 
+              onclick="toggleCoaRowDetail(${globalIdx})" 
+              class="p-1 rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all text-[11px] flex items-center gap-1"
+              title="Lihat detail penjelasan & coverage"
+            >
+              <svg class="w-3.5 h-3.5 transform transition-transform ${isExpanded ? 'rotate-180 text-blue-500' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+            </button>
+          </div>
+        </td>
       </tr>
+      ${expandedDrawerHtml}
     `;
   }).join('');
 
+  // 4. Render Kontrol Paginasi
+  let paginationControlsHtml = '';
+  if (totalPages > 1 || totalItems > 25) {
+    paginationControlsHtml = `
+      <div class="px-4 py-3 border-t border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black/5 dark:bg-white/5 text-xs font-mono">
+        <!-- Info Rentang Data -->
+        <div class="text-slate-500 dark:text-slate-400">
+          Menampilkan <strong class="text-slate-900 dark:text-white">${startIndex + 1}</strong> - <strong class="text-slate-900 dark:text-white">${endIndex}</strong> dari <strong class="text-slate-900 dark:text-white">${totalItems}</strong> baris akun
+        </div>
+
+        <!-- Tombol Halaman & Pilihan Baris -->
+        <div class="flex items-center gap-3 self-end sm:self-auto">
+          <!-- Pilihan Baris per Halaman -->
+          <div class="flex items-center gap-1.5 text-slate-500">
+            <span>Baris:</span>
+            <select 
+              onchange="setCoaPageSize(Number(this.value))" 
+              class="glass-input px-2 py-1 rounded-lg text-xs font-mono focus:outline-none"
+            >
+              <option value="25" ${pageSize === 25 ? 'selected' : ''}>25</option>
+              <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+              <option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option>
+              <option value="9999" ${pageSize >= 9999 ? 'selected' : ''}>Semua</option>
+            </select>
+          </div>
+
+          <!-- Navigasi Page -->
+          <div class="flex items-center gap-1">
+            <button 
+              type="button" 
+              onclick="setCoaPage(${currentPage - 1})" 
+              ${currentPage === 1 ? 'disabled class="px-2.5 py-1 rounded-lg border border-slate-200/40 dark:border-white/5 text-slate-300 dark:text-slate-600 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-all"'}
+            >
+              &larr; Prev
+            </button>
+
+            <span class="px-2.5 py-1 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">
+              ${currentPage} / ${totalPages}
+            </span>
+
+            <button 
+              type="button" 
+              onclick="setCoaPage(${currentPage + 1})" 
+              ${currentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded-lg border border-slate-200/40 dark:border-white/5 text-slate-300 dark:text-slate-600 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition-all"'}
+            >
+              Next &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 5. Rakit Keseluruhan Tampilan Tabel
   container.innerHTML = `
-    <div class="glass-panel rounded-2xl overflow-hidden shadow-sm">
-      <!-- Header Info Bar -->
+    <div class="glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 dark:border-white/10">
+      <!-- Top Info Bar -->
       <div class="px-5 py-3 border-b border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/5 dark:bg-white/5">
         <div class="flex items-center gap-2 text-xs font-mono">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="font-bold text-slate-800 dark:text-slate-200">Menampilkan ${filteredList.length} dari ${rawList.length} Baris Akun</span>
-          <span class="text-slate-400 dark:text-slate-500">&bull; Sheet: COA OPEX 2021 Presisi Full</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">Database Master COA Opex Presisi</span>
+          <span class="text-slate-400 dark:text-slate-500">&bull; ${totalItems} Baris Ditemukan</span>
         </div>
-        <div class="flex items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-slate-400">
-          <span>Struktur: BAB &bull; Sub-Bab &bull; Sub-Sub-Bab (Leaf)</span>
+        <div class="text-[11px] text-slate-400 font-mono">
+          Klik baris mana saja untuk melihat Detail Penjelasan & Coverage
         </div>
       </div>
 
-      <!-- Responsive Table Container -->
+      <!-- Responsive Table Grid -->
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-slate-200/80 dark:border-white/10 bg-slate-100/80 dark:bg-slate-800/80 text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
+            <tr class="border-b border-slate-200/80 dark:border-white/10 bg-slate-100/90 dark:bg-slate-800/90 text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
               <th class="py-3 px-3 text-center w-10">No</th>
-              <th class="py-3 px-3 whitespace-nowrap">Kode BAB</th>
-              <th class="py-3 px-3 whitespace-nowrap">Nama Kategori BAB</th>
-              <th class="py-3 px-3 whitespace-nowrap">Kode Sub-Bab</th>
-              <th class="py-3 px-3 whitespace-nowrap">Nama Sub-Bab</th>
-              <th class="py-3 px-3 whitespace-nowrap">Kode Sub-Sub</th>
-              <th class="py-3 px-3 whitespace-nowrap">Nama Sub-Sub-Bab</th>
-              <th class="py-3 px-3 min-w-[240px]">Detail Penjelasan & Coverage</th>
-              <th class="py-3 px-3 min-w-[200px]">Contoh Redaksi Teks</th>
+              <th class="py-3 px-3 whitespace-nowrap">Kode COA</th>
+              <th class="py-3 px-3 whitespace-nowrap">Nama Akun & Sub-Bab</th>
+              <th class="py-3 px-3 whitespace-nowrap">Kategori BAB</th>
               <th class="py-3 px-3 text-center whitespace-nowrap">Status Pajak</th>
-              <th class="py-3 px-3 text-center whitespace-nowrap">Catatan Sistem</th>
-              <th class="py-3 px-3 text-right whitespace-nowrap w-24">Aksi</th>
+              <th class="py-3 px-3 text-center whitespace-nowrap">Tipe Akun</th>
+              <th class="py-3 px-3 text-right whitespace-nowrap w-28">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200/40 dark:divide-white/5 font-sans">
@@ -398,24 +556,20 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
         </table>
       </div>
 
-      <!-- Table Summary Footer -->
-      <div class="p-3.5 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 bg-black/5 dark:bg-white/5">
-        <span>Astra Sales Operation (SO 2021) Master Database</span>
-        <span>${filteredList.length} baris data aktif</span>
-      </div>
+      <!-- Pagination Footer -->
+      ${paginationControlsHtml}
     </div>
   `;
 }
 
 /**
- * Render tampilan pohon kamus COA dengan hierarki bertingkat
+ * Render Tampilan Kartu Pohon Hierarki (Tree View)
  */
 function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
   const kw = (filterKeyword || '').toLowerCase().trim();
   const db = window.appState.masterCoaTree || window.astraCoaDatabase || [];
 
   const html = db.map(group => {
-    // Filter BAB
     if (babFilter !== 'ALL' && !group.groupCode.startsWith(babFilter)) {
       return '';
     }
@@ -489,7 +643,7 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
                         <button 
                           type="button" 
                           onclick="useCoaInTransaction('${acc.code}', '${acc.name.replace(/'/g, "\\'")}', '${(acc.detail || '').replace(/'/g, "\\'")}', '${acc.tax || '-'}')" 
-                          class="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold transition-all"
+                          class="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold transition-all active:scale-95"
                         >Gunakan</button>
                       </div>
                     </div>
@@ -509,7 +663,7 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
 }
 
 /**
- * Pengganti view mode antara Table dan Tree
+ * Ganti View Mode antara Table dan Tree
  */
 function setCoaViewMode(mode) {
   coaViewState.mode = mode;
@@ -535,6 +689,7 @@ function setCoaViewMode(mode) {
  */
 function setCoaBabFilter(bab) {
   coaViewState.activeBab = bab;
+  coaViewState.page = 1;
 
   const pills = ['ALL', '700', '710', '720'];
   pills.forEach(p => {
@@ -552,15 +707,70 @@ function setCoaBabFilter(bab) {
 }
 
 /**
- * Handle input pencarian langsung di tab Kamus COA
+ * Debounced search input (mencegah freeze browser saat mengetik cepat)
  */
 function handleCoaSearchInput(val) {
-  coaViewState.keyword = val;
-  renderCoaView();
+  if (coaSearchDebounceTimer) {
+    clearTimeout(coaSearchDebounceTimer);
+  }
+  coaSearchDebounceTimer = setTimeout(() => {
+    coaViewState.keyword = val;
+    coaViewState.page = 1;
+    renderCoaView();
+  }, 180);
 }
 
 function filterCoaTree(val) {
   handleCoaSearchInput(val);
+}
+
+/**
+ * Pindah Halaman pada Paginasi Tabel
+ */
+function setCoaPage(newPage) {
+  if (newPage < 1) return;
+  coaViewState.page = newPage;
+  renderCoaView();
+  const container = document.getElementById('coaMainContainer');
+  if (container) {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/**
+ * Ubah Jumlah Baris per Halaman
+ */
+function setCoaPageSize(newSize) {
+  coaViewState.pageSize = newSize;
+  coaViewState.page = 1;
+  renderCoaView();
+}
+
+/**
+ * Buka / Tutup Detail Baris Akun
+ */
+function toggleCoaRowDetail(globalIdx) {
+  if (coaViewState.expandedIndices.has(globalIdx)) {
+    coaViewState.expandedIndices.delete(globalIdx);
+  } else {
+    coaViewState.expandedIndices.add(globalIdx);
+  }
+  renderCoaView();
+}
+
+/**
+ * Menggunakan Akun dari Baris Tabel langsung ke modal Catat Beban
+ */
+function useCoaRow(globalIdx) {
+  const row = currentRenderedRows[globalIdx];
+  if (!row) return;
+
+  const code = (row.kodeSubSubBab && row.kodeSubSubBab !== '-') ? row.kodeSubSubBab : (row.kodeSubBab && row.kodeSubBab !== '-' ? row.kodeSubBab : row.kodeBab);
+  const name = (row.namaSubSubBab && row.namaSubSubBab !== '-') ? row.namaSubSubBab : (row.namaSubBab && row.namaSubBab !== '-' ? row.namaSubBab : row.kategoriBab);
+  const detail = row.detailPenjelasan || '';
+  const tax = row.statusPajak || '-';
+
+  useCoaInTransaction(code, name, detail, tax);
 }
 
 /**
@@ -572,7 +782,6 @@ function useCoaInTransaction(code, name, detail, tax) {
     const select = document.getElementById('fAkunCoa');
     if (select) {
       select.value = code;
-      // Auto pilih jika opsi sudah ada di select
       if (!select.value) {
         const opt = document.createElement('option');
         opt.value = code;
@@ -580,6 +789,7 @@ function useCoaInTransaction(code, name, detail, tax) {
         opt.selected = true;
         select.appendChild(opt);
       }
+      select.dispatchEvent(new Event('change'));
     }
 
     const descInput = document.getElementById('fKeterangan');
@@ -619,5 +829,9 @@ window.setCoaViewMode = setCoaViewMode;
 window.setCoaBabFilter = setCoaBabFilter;
 window.handleCoaSearchInput = handleCoaSearchInput;
 window.filterCoaTree = filterCoaTree;
+window.setCoaPage = setCoaPage;
+window.setCoaPageSize = setCoaPageSize;
+window.toggleCoaRowDetail = toggleCoaRowDetail;
+window.useCoaRow = useCoaRow;
 window.useCoaInTransaction = useCoaInTransaction;
 window.copyCoaCode = copyCoaCode;

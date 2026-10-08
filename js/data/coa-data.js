@@ -859,6 +859,102 @@ const astraCoaFlatDatabase = [
     contohRedaksi: 'Tagihan bulanan invoice vendor jasa pengamanan satpam & cleaning service',
     statusPajak: 'PPh 23 (2%)',
     catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.05.00.000',
+    namaSubBab: 'Outsourcing & Professional Services',
+    kodeSubSubBab: '720.05.02.000',
+    namaSubSubBab: 'Jasa Kurir, Pos & Ekspedisi Surat Dokumen',
+    detailPenjelasan: 'Ongkos kirim berkas tagihan leasing, BPKB, dokumen perpajakan, dan surat menyurat via JNE/TIKI/Pos.',
+    contohRedaksi: 'Pengiriman berkas faktur BPKB & dokumen leasing ke Head Office',
+    statusPajak: 'Non-Objek PPh',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.02.00.000',
+    namaSubBab: 'Utilities & Communication Expenses',
+    kodeSubSubBab: '720.02.04.000',
+    namaSubSubBab: 'Telepon Kantor & Pulsa Operasional',
+    detailPenjelasan: 'Tagihan telepon fixed line Telkom cabang dan pulsa paket data modem operasional.',
+    contohRedaksi: 'Tagihan bulanan telepon kabel kantor showroom Telkom',
+    statusPajak: 'PPN Bebas',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.03.00.000',
+    namaSubBab: 'Building & Facilities Maintenance',
+    kodeSubSubBab: '720.03.04.000',
+    namaSubBab: 'Pemeliharaan Taman & Area Parkir Cabang',
+    detailPenjelasan: 'Perawatan rumput, taman showroom, marka parkir konsumen, dan kebersihan selokan cabang.',
+    contohRedaksi: 'Jasa pemotongan rumput taman showroom & pengecatan marka parkir unit',
+    statusPajak: 'PPh 23 (Jasa)',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.04.00.000',
+    namaSubBab: 'IT, Software License & Cloud',
+    kodeSubSubBab: '720.04.03.000',
+    namaSubSubBab: 'Pemeliharaan Hardware Komputer & Printer',
+    detailPenjelasan: 'Perbaikan PC staf kasir, penggantian drum printer, kabel LAN jaringan, dan switch hub.',
+    contohRedaksi: 'Servis printer kasir finance & penggantian adaptor PC operasional',
+    statusPajak: 'PPh 23 (Jasa)',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.06.00.000',
+    namaSubBab: 'Taxes & Licenses (Pajak & Perizinan)',
+    kodeSubSubBab: '720.06.01.000',
+    namaSubSubBab: 'Pajak Bumi & Bangunan (PBB) Gedung Cabang',
+    detailPenjelasan: 'Setoran PBB tahunan gedung showroom, kantor, dan bengkel cabang Astra SO.',
+    contohRedaksi: 'Pembayaran SPPT PBB tahunan gedung showroom cabang',
+    statusPajak: 'Bukan Objek PPh',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.06.00.000',
+    namaSubBab: 'Taxes & Licenses (Pajak & Perizinan)',
+    kodeSubSubBab: '720.06.02.000',
+    namaSubSubBab: 'Pajak Reklame Papan Nama Showroom Cabang',
+    detailPenjelasan: 'Retribusi pajak daerah untuk neon sign, pylon sign, dan billboard merk Astra SO di depan gedung.',
+    contohRedaksi: 'Pajak reklame pylon sign merk showroom cabang periode tahunan',
+    statusPajak: 'Bukan Objek PPh',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.07.00.000',
+    namaSubBab: 'Insurance Expenses',
+    kodeSubSubBab: '720.07.01.000',
+    namaSubSubBab: 'Asuransi Kebakaran Gedung & Aset Showroom',
+    detailPenjelasan: 'Premi asuransi properti All Risk untuk gedung, bengkel, dan aset inventaris cabang.',
+    contohRedaksi: 'Alokasi premi asuransi kebakaran gedung cabang Astra Buana',
+    statusPajak: 'Bukan Objek PPh',
+    catatanPosting: 'Opex'
+  },
+  {
+    kodeBab: '720',
+    kategoriBab: 'GENERAL & ADMINISTRATIVE (G&A)',
+    kodeSubBab: '720.08.00.000',
+    namaSubBab: 'Public Relations & Representation',
+    kodeSubSubBab: '720.08.01.000',
+    namaSubBab: 'Konsumsi Tamu, Rapat & Hubungan Masyarakat',
+    detailPenjelasan: 'Snack box rapat koordinasi bulanan, jamuan auditor, dan konsumsi tamu eksternal cabang.',
+    contohRedaksi: 'Snack rapat bulanan review target penjualan tim cabang & jamuan tamu',
+    statusPajak: 'Non-Objek PPh',
+    catatanPosting: 'Opex'
   }
 ];
 

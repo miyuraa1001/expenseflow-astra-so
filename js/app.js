@@ -51,8 +51,10 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Persetujuan Kode Akun';
     if (subEl) subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
   } else if (viewKey === 'account') {
-    if (titleEl) titleEl.textContent = 'API & Integrasi Cloud';
-    if (subEl) subEl.textContent = 'Konfigurasi Google Apps Script & Parameter SO';
+    if (titleEl) titleEl.textContent = 'Pengaturan & Akun Astra SO';
+    if (subEl) subEl.textContent = 'Akses Admin, Preferensi Tema & Sinkronisasi Database';
+    if (typeof updateAccountViewStats === 'function') updateAccountViewStats();
+    if (typeof updateThemeUi === 'function') updateThemeUi();
   }
 
   const scrollContainer = document.getElementById('workspaceScrollContainer');

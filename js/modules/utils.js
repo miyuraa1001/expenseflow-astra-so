@@ -44,6 +44,47 @@ function showToast(msg, type = 'info') {
 }
 
 /**
+ * Set theme explicitly to 'dark' or 'light'
+ */
+function setAppTheme(theme) {
+  if (theme === 'light') {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    StorageManager.setTheme('light');
+  } else {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    StorageManager.setTheme('dark');
+  }
+  updateThemeUi();
+}
+
+/**
+ * Update visual active indicators on theme cards
+ */
+function updateThemeUi() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const cardLight = document.getElementById('themeCardLight');
+  const cardDark = document.getElementById('themeCardDark');
+  const dotLight = document.getElementById('themeIndicatorLight');
+  const dotDark = document.getElementById('themeIndicatorDark');
+
+  if (cardLight && cardDark) {
+    if (isDark) {
+      cardDark.className = 'p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 text-left transition-all flex items-center justify-between shadow-sm';
+      cardLight.className = 'p-4 rounded-2xl border border-slate-200/60 dark:border-white/10 text-left transition-all flex items-center justify-between hover:border-blue-500/50';
+      if (dotDark) dotDark.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500"></span>';
+      if (dotLight) dotLight.innerHTML = '<span class="w-2 h-2 rounded-full bg-transparent"></span>';
+    } else {
+      cardLight.className = 'p-4 rounded-2xl border-2 border-blue-500 bg-blue-500/10 text-left transition-all flex items-center justify-between shadow-sm';
+      cardDark.className = 'p-4 rounded-2xl border border-slate-200/60 dark:border-white/10 text-left transition-all flex items-center justify-between hover:border-blue-500/50';
+      if (dotLight) dotLight.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500"></span>';
+      if (dotDark) dotDark.innerHTML = '<span class="w-2 h-2 rounded-full bg-transparent"></span>';
+    }
+  }
+}
+
+/**
  * Initialize theme based on LocalStorage or default dark mode
  */
 function initTheme() {
@@ -55,6 +96,7 @@ function initTheme() {
     document.documentElement.classList.add('dark');
     document.documentElement.classList.remove('light');
   }
+  updateThemeUi();
 }
 
 /**
@@ -62,15 +104,7 @@ function initTheme() {
  */
 function toggleTheme() {
   const isDark = document.documentElement.classList.contains('dark');
-  if (isDark) {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
-    StorageManager.setTheme('light');
-  } else {
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-    StorageManager.setTheme('dark');
-  }
+  setAppTheme(isDark ? 'light' : 'dark');
 }
 
 /**
@@ -104,5 +138,8 @@ window.formatNumber = formatNumber;
 window.showToast = showToast;
 window.initTheme = initTheme;
 window.toggleTheme = toggleTheme;
+window.setAppTheme = setAppTheme;
+window.updateThemeUi = updateThemeUi;
 window.exportToCsv = exportToCsv;
+
 
