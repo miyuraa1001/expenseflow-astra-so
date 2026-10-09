@@ -41,8 +41,8 @@ function switchView(viewKey) {
   const titleEl = document.getElementById('pageTitle');
   const subEl = document.getElementById('pageSubtitle');
   if (viewKey === 'dashboard') {
-    if (titleEl) titleEl.textContent = 'Dashboard Beban Operasional';
-    if (subEl) subEl.textContent = 'Astra Sales Operation (SO 2021) • Selling & G&A';
+    if (titleEl) titleEl.textContent = 'Dashboard ExpenseFlow';
+    if (subEl) subEl.textContent = 'Astra Daihatsu Lampung';
   } else if (viewKey === 'coa') {
     if (titleEl) titleEl.textContent = 'Book Master COA Astra SO';
     if (subEl) subEl.textContent = 'Master COA Opex 2021 Presisi Full • Standar Astra Sales Operation';
