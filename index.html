@@ -162,158 +162,210 @@
         </div>
       </header>
 
-      <div id="workspaceScrollContainer" class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 pb-28 md:pb-8">
+      <div id="workspaceScrollContainer" class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3.5 sm:space-y-5 pb-24 md:pb-8">
 
-        <!-- VIEW 1: DASHBOARD / BUKU TRANSAKSI -->
-        <section id="view-dashboard" class="space-y-6">
+        <!-- VIEW 1: DASHBOARD / EXECUTIVE ANALYTICS -->
+        <section id="view-dashboard" class="space-y-3 sm:space-y-4">
 
-          <!-- 4-Column Balanced Executive KPI Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <!-- 1. 2x2 Mobile / 4-Col Desktop Compact Executive KPI Grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             
             <!-- KPI 1: Total Realisasi Opex vs Plafon Rp 85M -->
-            <div class="p-4 sm:p-5 rounded-2xl glass-panel relative overflow-hidden flex flex-col justify-between">
+            <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 relative overflow-hidden flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                  <span class="font-medium">Total Beban Berjalan</span>
-                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold">SO 2021</span>
+                <div class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+                  <span class="font-medium truncate">Beban Berjalan</span>
+                  <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold shrink-0">SO 2021</span>
                 </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                  <span class="text-xs font-mono text-slate-400">Rp</span>
-                  <span id="kpiTotalOpex" class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white tracking-tight">0</span>
+                <div class="mt-1 flex items-baseline gap-1 truncate">
+                  <span class="text-[10px] sm:text-xs font-mono text-slate-400 font-semibold">Rp</span>
+                  <span id="kpiTotalOpex" class="text-xs sm:text-lg font-bold font-mono text-slate-900 dark:text-white tracking-tight truncate">0</span>
                 </div>
               </div>
-              <div class="mt-3 space-y-1.5">
-                <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>Plafon: <strong class="text-slate-700 dark:text-slate-300">Rp 85,0M</strong></span>
-                  <span id="kpiBurnPercent" class="text-emerald-500 font-semibold font-mono">0,0%</span>
+              <div class="mt-2 space-y-1">
+                <div class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400">
+                  <span class="truncate">Plafon: 85M</span>
+                  <span id="kpiBurnPercent" class="text-emerald-500 font-bold font-mono">0,0%</span>
                 </div>
-                <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 sm:h-1.5 rounded-full overflow-hidden">
                   <div id="kpiProgressBar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
                 </div>
-                <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-0.5">
-                  <span>Sisa: <span id="kpiRemainingBudget" class="text-slate-600 dark:text-slate-300 font-semibold">Rp 85.000.000</span></span>
-                  <span id="kpiBurnStatus" class="text-emerald-500">Normal</span>
+                <div class="flex items-center justify-between text-[8px] sm:text-[9px] font-mono text-slate-400 pt-0.5">
+                  <span class="truncate">Sisa: <span id="kpiRemainingBudget" class="text-slate-700 dark:text-slate-300 font-semibold">Rp 85M</span></span>
+                  <span id="kpiBurnStatus" class="text-emerald-500 font-semibold">Aman</span>
                 </div>
               </div>
             </div>
 
             <!-- KPI 2: Komparasi SE vs G&A -->
-            <div class="p-4 sm:p-5 rounded-2xl glass-panel flex flex-col justify-between">
+            <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                  <span class="font-medium">Distribusi Beban Opex</span>
-                  <span class="text-[10px] font-mono text-slate-400">SAP Ratio</span>
+                <div class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+                  <span class="font-medium truncate">Distribusi Opex</span>
+                  <span class="text-[9px] font-mono text-slate-400 shrink-0">Rasio</span>
                 </div>
-                <div class="mt-2.5 space-y-2 text-xs font-mono">
-                  <div class="flex justify-between items-center">
-                    <span class="text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 7100 Selling (SE)
+                <div class="mt-1 space-y-1 text-[10px] sm:text-xs font-mono">
+                  <div class="flex justify-between items-center gap-1">
+                    <span class="text-indigo-600 dark:text-indigo-400 flex items-center gap-1 truncate text-[9px] sm:text-[11px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> 7100 SE
                     </span>
-                    <div class="flex items-center gap-1.5">
-                      <span id="kpiSeTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
-                      <span id="kpiSePercent" class="text-[10px] text-indigo-500 font-bold">(0%)</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span id="kpiSeTotal" class="font-bold text-slate-800 dark:text-slate-200 text-[10px] sm:text-xs">Rp 0</span>
+                      <span id="kpiSePercent" class="text-[8px] sm:text-[9px] text-indigo-500 font-bold">(0%)</span>
                     </div>
                   </div>
-                  <div class="flex justify-between items-center">
-                    <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-blue-500"></span> 7200 General (GA)
+                  <div class="flex justify-between items-center gap-1">
+                    <span class="text-blue-600 dark:text-blue-400 flex items-center gap-1 truncate text-[9px] sm:text-[11px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span> 7200 GA
                     </span>
-                    <div class="flex items-center gap-1.5">
-                      <span id="kpiGaTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
-                      <span id="kpiGaPercent" class="text-[10px] text-blue-500 font-bold">(0%)</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span id="kpiGaTotal" class="font-bold text-slate-800 dark:text-slate-200 text-[10px] sm:text-xs">Rp 0</span>
+                      <span id="kpiGaPercent" class="text-[8px] sm:text-[9px] text-blue-500 font-bold">(0%)</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-3 flex overflow-hidden">
+              <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 sm:h-1.5 rounded-full mt-2 flex overflow-hidden">
                 <div id="kpiSeBar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%;"></div>
                 <div id="kpiGaBar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%;"></div>
               </div>
             </div>
 
             <!-- KPI 3: Kas Operasional (Petty Cash vs Bank) -->
-            <div class="p-4 sm:p-5 rounded-2xl glass-panel flex flex-col justify-between">
+            <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                  <span class="font-medium">Kas & Sumber Dana</span>
-                  <span class="text-[10px] font-mono text-slate-400">Payment Channel</span>
+                <div class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+                  <span class="font-medium truncate">Kas Operasional</span>
+                  <span class="text-[9px] font-mono text-slate-400 shrink-0">Kasir</span>
                 </div>
-                <div class="mt-2.5 space-y-2 text-xs font-mono">
-                  <div class="flex justify-between items-center">
-                    <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 truncate">
-                      <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Petty Cash Cabang
+                <div class="mt-1 space-y-1 text-[10px] sm:text-xs font-mono">
+                  <div class="flex justify-between items-center gap-1">
+                    <span class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 truncate text-[9px] sm:text-[11px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Petty Cash
                     </span>
-                    <div class="flex items-center gap-1.5">
-                      <span id="kpiPettyTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
-                      <span id="kpiPettyCount" class="text-[10px] text-slate-400">(0)</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span id="kpiPettyTotal" class="font-bold text-slate-800 dark:text-slate-200 text-[10px] sm:text-xs">Rp 0</span>
+                      <span id="kpiPettyCount" class="text-[8px] sm:text-[9px] text-slate-400">(0)</span>
                     </div>
                   </div>
-                  <div class="flex justify-between items-center">
-                    <span class="text-sky-600 dark:text-sky-400 flex items-center gap-1.5 truncate">
-                      <span class="w-2 h-2 rounded-full bg-sky-500"></span> Bank / Kliring
+                  <div class="flex justify-between items-center gap-1">
+                    <span class="text-sky-600 dark:text-sky-400 flex items-center gap-1 truncate text-[9px] sm:text-[11px]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0"></span> Bank Kliring
                     </span>
-                    <div class="flex items-center gap-1.5">
-                      <span id="kpiBankTotal" class="font-semibold text-slate-800 dark:text-slate-200">Rp 0</span>
-                      <span id="kpiBankCount" class="text-[10px] text-slate-400">(0)</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span id="kpiBankTotal" class="font-bold text-slate-800 dark:text-slate-200 text-[10px] sm:text-xs">Rp 0</span>
+                      <span id="kpiBankCount" class="text-[8px] sm:text-[9px] text-slate-400">(0)</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-3 flex overflow-hidden">
+              <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 sm:h-1.5 rounded-full mt-2 flex overflow-hidden">
                 <div id="kpiPettyBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%;"></div>
                 <div id="kpiBankBar" class="bg-sky-500 h-full transition-all duration-500" style="width: 0%;"></div>
               </div>
             </div>
 
             <!-- KPI 4: Tata Kelola & Otorisasi Dual-Control -->
-            <div class="p-4 sm:p-5 rounded-2xl glass-panel flex flex-col justify-between">
+            <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 flex flex-col justify-between">
               <div>
-                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                  <span class="font-medium">Tata Kelola & Validasi</span>
-                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">PSAK Astra</span>
+                <div class="flex items-center justify-between text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+                  <span class="font-medium truncate">Tata Kelola</span>
+                  <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">PSAK</span>
                 </div>
-                <div class="mt-2 flex items-baseline justify-between">
-                  <div>
-                    <span id="kpiTotalEntries" class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">0</span>
-                    <span class="text-xs text-slate-400 ml-1">Transaksi</span>
+                <div class="mt-1 flex items-baseline justify-between gap-1">
+                  <div class="truncate">
+                    <span id="kpiTotalEntries" class="text-xs sm:text-lg font-bold font-mono text-slate-900 dark:text-white">0</span>
+                    <span class="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 ml-0.5">Voucher</span>
                   </div>
-                  <span id="kpiPendingBadge" class="text-xs font-mono font-bold text-slate-400 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 0 Pending COA
+                  <span id="kpiPendingBadge" class="text-[9px] sm:text-[10px] font-mono font-bold text-slate-400 shrink-0">
+                    0 Pending
                   </span>
                 </div>
-                <p id="kpiAuditStatus" class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 truncate">
-                  Level Audit: <strong class="text-slate-700 dark:text-slate-300">Dual-Control 100% OK</strong>
+                <p id="kpiAuditStatus" class="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+                  Dual-Control 100% OK
                 </p>
               </div>
-              <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 sm:h-1.5 rounded-full mt-2 overflow-hidden">
                 <div class="bg-emerald-500 h-full rounded-full" style="width: 100%;"></div>
               </div>
             </div>
 
           </div>
 
-          <!-- Middle Analytics Row: Category Donut Breakdown & Top 5 Expenses + Quick Shortcuts -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- 2. Quick Action Shortcuts (Thumb-friendly directly accessible below KPIs) -->
+          <div class="rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 p-2.5 sm:p-3.5">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs sm:text-sm">⚡</span>
+                <div>
+                  <h4 class="font-bold text-[11px] sm:text-xs text-slate-900 dark:text-white">Voucher Cepat Beban Harian</h4>
+                  <p class="text-[9px] text-slate-500 dark:text-slate-400 hidden sm:block">1-klik buka form dengan akun & keterangan standar</p>
+                </div>
+              </div>
+              <button onclick="openTransactionModal()" class="text-[10px] sm:text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5">
+                <span>+ Entri Beban</span>
+              </button>
+            </div>
+
+            <!-- Quick Action 6-Grid Chips -->
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 pt-0.5">
+              <button onclick="quickAddExpense('galon')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">💧</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">Air Galon</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">720.02 • GA</span>
+              </button>
+
+              <button onclick="quickAddExpense('listrik')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">⚡</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">Token PLN</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">720.02 • PLN</span>
+              </button>
+
+              <button onclick="quickAddExpense('ac')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">❄️</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">Cuci AC</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">720.03 • AC</span>
+              </button>
+
+              <button onclick="quickAddExpense('bbm')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">⛽</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">BBM Sales</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">710.03 • SE</span>
+              </button>
+
+              <button onclick="quickAddExpense('lembur')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">🍱</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">Lembur</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">700.02 • Makan</span>
+              </button>
+
+              <button onclick="quickAddExpense('atk')" class="p-1.5 sm:p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/40 border border-slate-200/70 dark:border-white/10 transition-all text-center flex flex-col items-center justify-center group active:scale-95">
+                <span class="text-sm sm:text-base">📦</span>
+                <span class="font-bold text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate w-full mt-0.5">ATK & SPK</span>
+                <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 truncate w-full">720.01 • Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Middle Analytics Row: Compact Category Donut & Top 5 Expenses -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-4">
 
             <!-- LEFT: Category Distribution (SVG Donut + Breakdown) (5 cols) -->
-            <div class="lg:col-span-5 rounded-2xl glass-panel p-5 flex flex-col justify-between">
-              <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
-                <div>
-                  <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/></svg>
-                    Struktur Beban (BAB COA)
-                  </h3>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Proporsi pengeluaran berdasarkan master akun Astra</p>
-                </div>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 font-bold">Presisi</span>
+            <div class="lg:col-span-5 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 p-3 sm:p-4 flex flex-col justify-between">
+              <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-2">
+                <h3 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/></svg>
+                  Struktur Beban (BAB COA)
+                </h3>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-500 font-bold">Presisi</span>
               </div>
 
               <!-- SVG Donut Chart & Center Stats -->
-              <div class="py-4 flex flex-col sm:flex-row items-center justify-around gap-4">
-                <div class="relative w-36 h-36 flex items-center justify-center shrink-0">
-                  <svg class="w-36 h-36 -rotate-90" viewBox="0 0 100 100">
+              <div class="py-2.5 flex items-center justify-between gap-3 sm:gap-4">
+                <div class="relative w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center shrink-0">
+                  <svg class="w-20 h-20 sm:w-28 sm:h-28 -rotate-90" viewBox="0 0 100 100">
                     <!-- Base Track Circle -->
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="currentColor" stroke-width="12" class="text-slate-200/50 dark:text-white/5" />
+                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="currentColor" stroke-width="12" class="text-slate-200 dark:text-slate-700/60" />
                     <!-- BAB 700 Arc (Emerald) -->
                     <circle id="donutBab700" cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="12" stroke-dasharray="0 251.32" stroke-dashoffset="0" class="transition-all duration-700" />
                     <!-- BAB 710 Arc (Indigo) -->
@@ -321,62 +373,62 @@
                     <!-- BAB 720 Arc (Blue) -->
                     <circle id="donutBab720" cx="50" cy="50" r="40" fill="transparent" stroke="#3b82f6" stroke-width="12" stroke-dasharray="0 251.32" stroke-dashoffset="0" class="transition-all duration-700" />
                   </svg>
-                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-2">
-                    <span class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Total Opex</span>
-                    <span id="donutCenterTotal" class="text-xs font-mono font-bold text-slate-900 dark:text-white mt-0.5 truncate max-w-[85px]">Rp 0</span>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-1">
+                    <span class="text-[8px] font-mono text-slate-400 uppercase tracking-wider">Total</span>
+                    <span id="donutCenterTotal" class="text-[9px] sm:text-xs font-mono font-bold text-slate-900 dark:text-white truncate max-w-[55px] sm:max-w-[75px]">Rp 0</span>
                   </div>
                 </div>
 
                 <!-- Mini Legend & Stats Column -->
-                <div class="w-full sm:w-auto flex-1 space-y-2 text-xs font-mono">
+                <div class="flex-1 space-y-1.5 text-xs font-mono">
                   
                   <!-- BAB 700 Row -->
-                  <div class="p-2 rounded-xl bg-black/5 dark:bg-white/5 space-y-1">
-                    <div class="flex items-center justify-between text-[11px]">
-                      <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold font-sans">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 700 Employee
+                  <div class="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 space-y-0.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                      <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold font-sans truncate">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> 700 Employee
                       </span>
-                      <span id="legendBab700Pct" class="font-bold text-emerald-500">0%</span>
+                      <span id="legendBab700Pct" class="font-bold text-emerald-500 shrink-0">0%</span>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center justify-between text-[9px] text-slate-500 dark:text-slate-400">
                       <span>Subtotal:</span>
                       <span id="legendBab700Total" class="font-bold text-slate-800 dark:text-slate-200">Rp 0</span>
                     </div>
-                    <div class="w-full bg-slate-200 dark:bg-white/10 h-1 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 rounded-full overflow-hidden">
                       <div id="legendBab700Bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%;"></div>
                     </div>
                   </div>
 
                   <!-- BAB 710 Row -->
-                  <div class="p-2 rounded-xl bg-black/5 dark:bg-white/5 space-y-1">
-                    <div class="flex items-center justify-between text-[11px]">
-                      <span class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-semibold font-sans">
-                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 710 Selling (SE)
+                  <div class="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 space-y-0.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                      <span class="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold font-sans truncate">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> 710 Selling SE
                       </span>
-                      <span id="legendBab710Pct" class="font-bold text-indigo-500">0%</span>
+                      <span id="legendBab710Pct" class="font-bold text-indigo-500 shrink-0">0%</span>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center justify-between text-[9px] text-slate-500 dark:text-slate-400">
                       <span>Subtotal:</span>
                       <span id="legendBab710Total" class="font-bold text-slate-800 dark:text-slate-200">Rp 0</span>
                     </div>
-                    <div class="w-full bg-slate-200 dark:bg-white/10 h-1 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 rounded-full overflow-hidden">
                       <div id="legendBab710Bar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%;"></div>
                     </div>
                   </div>
 
                   <!-- BAB 720 Row -->
-                  <div class="p-2 rounded-xl bg-black/5 dark:bg-white/5 space-y-1">
-                    <div class="flex items-center justify-between text-[11px]">
-                      <span class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-semibold font-sans">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> 720 General Admin
+                  <div class="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 space-y-0.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                      <span class="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold font-sans truncate">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span> 720 General GA
                       </span>
-                      <span id="legendBab720Pct" class="font-bold text-blue-500">0%</span>
+                      <span id="legendBab720Pct" class="font-bold text-blue-500 shrink-0">0%</span>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center justify-between text-[9px] text-slate-500 dark:text-slate-400">
                       <span>Subtotal:</span>
                       <span id="legendBab720Total" class="font-bold text-slate-800 dark:text-slate-200">Rp 0</span>
                     </div>
-                    <div class="w-full bg-slate-200 dark:bg-white/10 h-1 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 rounded-full overflow-hidden">
                       <div id="legendBab720Bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%;"></div>
                     </div>
                   </div>
@@ -384,177 +436,97 @@
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-                <span>Standar Akun Opex 2021 Presisi</span>
-                <button onclick="switchView('coa')" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1">
-                  <span>Buka Book COA</span>
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+              <div class="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-400">
+                <span>Master SO 2021 Presisi</span>
+                <button onclick="switchView('coa')" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-0.5">
+                  <span>Lihat COA</span>
+                  <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 </button>
               </div>
             </div>
 
-            <!-- RIGHT: Top 5 Beban Terbesar & Quick Expense Shortcuts (7 cols) -->
-            <div class="lg:col-span-7 space-y-4">
-
-              <!-- Top 5 Card -->
-              <div class="rounded-2xl glass-panel p-5">
-                <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
-                  <div>
-                    <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.072 0a5.25 5.25 0 00-7.016 0m7.016 0A5.25 5.25 0 0112 11.25c1.45 0 2.76.587 3.708 1.54M12 4.5a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/></svg>
-                      Top 5 Beban Operasional Terbesar
-                    </h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Ranking pos pengeluaran dengan realisasi biaya tertinggi</p>
-                  </div>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 font-bold">Prioritas</span>
-                </div>
-
-                <!-- Top 5 List Container -->
-                <div id="top5ExpensesContainer" class="divide-y divide-slate-200/40 dark:divide-white/5 py-1">
-                  <!-- Populated dynamically via JS -->
-                </div>
+            <!-- RIGHT: Top 5 Beban Terbesar (7 cols) -->
+            <div class="lg:col-span-7 rounded-xl sm:rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 p-3 sm:p-4">
+              <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-2">
+                <h3 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.072 0a5.25 5.25 0 00-7.016 0m7.016 0A5.25 5.25 0 0112 11.25c1.45 0 2.76.587 3.708 1.54M12 4.5a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/></svg>
+                  Top 5 Beban Terbesar
+                </h3>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-500 font-bold">Prioritas</span>
               </div>
 
-              <!-- Quick Expense Shortcuts Card -->
-              <div class="rounded-2xl glass-panel p-4">
-                <div class="flex items-center justify-between mb-2.5">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm">⚡</span>
-                    <div>
-                      <h4 class="font-bold text-xs text-slate-900 dark:text-white">Voucher Cepat Beban Harian</h4>
-                      <p class="text-[10px] text-slate-400">1-klik buka form dengan akun, cost center & uraian standar</p>
-                    </div>
-                  </div>
-                  <button onclick="openTransactionModal()" class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">
-                    + Formulir Manual
-                  </button>
-                </div>
-
-                <!-- Quick Action Chips -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                  <button onclick="quickAddExpense('galon')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">💧</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">Air Minum Galon</div>
-                      <div class="text-[9px] font-mono text-slate-400">720.02 • GA</div>
-                    </div>
-                  </button>
-
-                  <button onclick="quickAddExpense('listrik')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">⚡</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">Token Listrik PLN</div>
-                      <div class="text-[9px] font-mono text-slate-400">720.02 • PLN</div>
-                    </div>
-                  </button>
-
-                  <button onclick="quickAddExpense('ac')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">❄️</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">Servis & Cuci AC</div>
-                      <div class="text-[9px] font-mono text-slate-400">720.03 • Gedung</div>
-                    </div>
-                  </button>
-
-                  <button onclick="quickAddExpense('bbm')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">⛽</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">BBM Test Drive Sales</div>
-                      <div class="text-[9px] font-mono text-slate-400">710.03 • SE</div>
-                    </div>
-                  </button>
-
-                  <button onclick="quickAddExpense('lembur')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">🍱</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">Uang Makan Lembur</div>
-                      <div class="text-[9px] font-mono text-slate-400">700.02 • Employee</div>
-                    </div>
-                  </button>
-
-                  <button onclick="quickAddExpense('atk')" class="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 border border-transparent transition-all text-left flex items-center gap-2 group">
-                    <span class="text-base">📦</span>
-                    <div class="min-w-0">
-                      <div class="font-bold text-[11px] text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">ATK & Form SPK</div>
-                      <div class="text-[9px] font-mono text-slate-400">720.01 • Admin</div>
-                    </div>
-                  </button>
-                </div>
+              <!-- Top 5 List Container -->
+              <div id="top5ExpensesContainer" class="divide-y divide-slate-200/40 dark:divide-white/5 py-0.5">
+                <!-- Populated dynamically via JS -->
               </div>
-
             </div>
+
           </div>
 
-          <!-- Dual Filter Bar (Period & Category) + Search -->
-          <div class="space-y-3 pt-2">
+          <!-- 4. Dual Filter Bar (Period & Category) + Search -->
+          <div class="space-y-2 pt-1">
             <!-- Search & Actions Bar -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               
               <!-- Quick Search Input -->
               <div class="relative flex-1 max-w-md">
-                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                 <input 
                   id="tableSearchInput" 
                   type="text" 
-                  placeholder="Cari transaksi, SPK, nota, cost center, atau akun..." 
+                  placeholder="Cari transaksi, SPK, nota, cost center..." 
                   oninput="handleSearch(this.value)"
-                  class="w-full glass-input text-xs pl-9 pr-4 py-2.5 rounded-xl focus:outline-none"
+                  class="w-full glass-input text-xs pl-8 pr-3 py-2 rounded-xl focus:outline-none"
                 >
               </div>
 
               <!-- Export and Add Expense Button -->
-              <div class="flex items-center gap-2 self-end sm:self-auto">
-                <button onclick="exportToCsv()" class="px-3 py-2 rounded-xl glass-panel text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-500 flex items-center gap-1.5 transition-colors">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-                  <span>Export CSV</span>
+              <div class="flex items-center gap-1.5 self-end sm:self-auto">
+                <button onclick="exportToCsv()" class="px-2.5 py-1.5 rounded-xl glass-panel text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-500 flex items-center gap-1 transition-colors">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                  <span>CSV</span>
                 </button>
-                <button onclick="openTransactionModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all">
+                <button onclick="openTransactionModal()" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition-all">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                   <span>Catat Beban</span>
                 </button>
               </div>
             </div>
 
-            <!-- Filter Row: Combined Period & Category Pills -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
+            <!-- Filter Row: Combined Period & Category Horizontal Scroller -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
               
               <!-- Period Filter Pills -->
-              <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-                <span class="text-[11px] font-mono text-slate-400 mr-1 flex items-center gap-1 shrink-0">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253 3.75h18m-18 0v12.75a2.25 2.25 0 002.25 2.25h13.5a2.25 2.25 0 002.25-2.25V6.75m-18 0h18"/></svg>
-                  Periode:
-                </span>
-                <button onclick="setPeriodFilter('ALL', this)" class="period-pill px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-sm transition-all whitespace-nowrap">
-                  Semua Waktu
+              <div class="flex items-center gap-1 overflow-x-auto pb-0.5 no-scrollbar text-xs">
+                <span class="text-[10px] font-mono text-slate-400 mr-0.5 shrink-0">Waktu:</span>
+                <button onclick="setPeriodFilter('ALL', this)" class="period-pill px-2.5 py-1 rounded-lg font-semibold bg-blue-600 text-white text-[10px] sm:text-[11px] shadow-sm transition-all whitespace-nowrap">
+                  Semua
                 </button>
-                <button onclick="setPeriodFilter('MONTH', this)" class="period-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                <button onclick="setPeriodFilter('MONTH', this)" class="period-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
                   Bulan Ini
                 </button>
-                <button onclick="setPeriodFilter('WEEK', this)" class="period-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
-                  7 Hari Terakhir
+                <button onclick="setPeriodFilter('WEEK', this)" class="period-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
+                  7 Hari
                 </button>
-                <button onclick="setPeriodFilter('TODAY', this)" class="period-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                <button onclick="setPeriodFilter('TODAY', this)" class="period-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
                   Hari Ini
                 </button>
               </div>
 
               <!-- Category BAB Filter Pills -->
-              <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-                <span class="text-[11px] font-mono text-slate-400 mr-1 flex items-center gap-1 shrink-0">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
-                  Kategori:
-                </span>
-                <button onclick="setFilter('ALL', this)" class="filter-pill px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-sm transition-all whitespace-nowrap">
-                  Semua BAB
+              <div class="flex items-center gap-1 overflow-x-auto pb-0.5 no-scrollbar text-xs">
+                <span class="text-[10px] font-mono text-slate-400 mr-0.5 shrink-0">BAB:</span>
+                <button onclick="setFilter('ALL', this)" class="filter-pill px-2.5 py-1 rounded-lg font-semibold bg-blue-600 text-white text-[10px] sm:text-[11px] shadow-sm transition-all whitespace-nowrap">
+                  Semua
                 </button>
-                <button onclick="setFilter('700', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
+                <button onclick="setFilter('700', this)" class="filter-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
                   700 Employee
                 </button>
-                <button onclick="setFilter('710', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
-                  710 Selling (SE)
+                <button onclick="setFilter('710', this)" class="filter-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
+                  710 Selling
                 </button>
-                <button onclick="setFilter('720', this)" class="filter-pill px-3 py-1.5 rounded-xl font-medium glass-panel text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-all whitespace-nowrap">
-                  720 General Admin (GA)
+                <button onclick="setFilter('720', this)" class="filter-pill px-2.5 py-1 rounded-lg font-medium glass-panel border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-500 text-[10px] sm:text-[11px] transition-all whitespace-nowrap">
+                  720 Admin
                 </button>
               </div>
 

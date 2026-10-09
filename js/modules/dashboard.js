@@ -324,21 +324,21 @@ function renderDashboard() {
 
     if (top5List.length === 0) {
       top5Container.innerHTML = `
-        <div class="py-8 text-center space-y-1.5">
-          <div class="w-8 h-8 rounded-xl bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto text-sm">
+        <div class="py-5 text-center space-y-1">
+          <div class="w-7 h-7 rounded-lg bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto text-xs">
             📊
           </div>
           <p class="text-xs text-slate-700 dark:text-slate-300 font-semibold">Belum Ada Pengeluaran</p>
-          <p class="text-[11px] text-slate-400">Belum ada transaksi beban yang dicatat pada periode ini.</p>
+          <p class="text-[10px] text-slate-400">Belum ada transaksi beban yang dicatat pada periode ini.</p>
         </div>
       `;
     } else {
       const rankBadges = [
-        'bg-amber-500/20 text-amber-500 border border-amber-500/30 font-bold',
-        'bg-slate-400/20 text-slate-400 border border-slate-400/30 font-bold',
-        'bg-orange-500/20 text-orange-400 border border-orange-500/30 font-bold',
-        'bg-blue-500/15 text-blue-400 border border-blue-500/20 font-semibold',
-        'bg-blue-500/15 text-blue-400 border border-blue-500/20 font-semibold'
+        'bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/40 font-bold',
+        'bg-slate-400/20 text-slate-700 dark:text-slate-200 border border-slate-400/40 font-bold',
+        'bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/40 font-bold',
+        'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-semibold',
+        'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-semibold'
       ];
 
       top5Container.innerHTML = top5List.map((item, idx) => {
@@ -347,30 +347,30 @@ function renderDashboard() {
         const sharePct = totalAmount > 0 ? ((item.total / totalAmount) * 100).toFixed(1) : '0';
 
         return `
-          <div class="py-2.5 flex items-center justify-between gap-3 group hover:bg-black/5 dark:hover:bg-white/5 px-2 rounded-xl transition-colors">
-            <div class="flex items-center gap-2.5 min-w-0 flex-1">
-              <span class="w-6 h-6 rounded-lg ${badgeCls} text-[11px] font-mono flex items-center justify-center shrink-0">
+          <div class="py-1.5 sm:py-2 flex items-center justify-between gap-2.5 group hover:bg-black/5 dark:hover:bg-white/5 px-1.5 rounded-lg transition-colors">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <span class="w-5 h-5 rounded ${badgeCls} text-[10px] font-mono flex items-center justify-center shrink-0">
                 #${idx + 1}
               </span>
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-blue-600 dark:text-blue-400 text-[11px] font-bold">${item.code}</span>
-                  <span class="text-xs font-semibold text-slate-900 dark:text-white truncate">${item.name}</span>
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="font-mono text-blue-600 dark:text-blue-400 text-[10px] sm:text-[11px] font-bold shrink-0">${item.code}</span>
+                  <span class="text-[11px] sm:text-xs font-semibold text-slate-900 dark:text-white truncate">${item.name}</span>
                 </div>
-                <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                <div class="flex items-center gap-1.5 text-[9px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   <span class="font-mono">${item.costCenter}</span>
                   <span>&bull;</span>
-                  <span>${item.count} transaksi</span>
+                  <span>${item.count} voucher</span>
                   <span>&bull;</span>
-                  <span class="font-mono text-emerald-500">${sharePct}% dari total</span>
+                  <span class="font-mono text-emerald-500 font-semibold">${sharePct}% total</span>
                 </div>
-                <div class="w-full bg-slate-200 dark:bg-white/10 h-1 rounded-full mt-1.5 overflow-hidden">
+                <div class="w-full bg-slate-200 dark:bg-slate-700/60 h-1 rounded-full mt-1 overflow-hidden">
                   <div class="bg-blue-600 dark:bg-blue-500 h-full rounded-full transition-all duration-500" style="width: ${barPct}%;"></div>
                 </div>
               </div>
             </div>
             <div class="text-right shrink-0">
-              <span class="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">
+              <span class="font-mono font-bold text-[11px] sm:text-xs text-slate-900 dark:text-white block">
                 Rp ${formatNumber(item.total)}
               </span>
             </div>
@@ -388,15 +388,15 @@ function renderDashboard() {
     if (tableFiltered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="py-12 text-center">
-            <div class="max-w-xs mx-auto space-y-2">
-              <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+          <td colspan="7" class="py-10 text-center">
+            <div class="max-w-xs mx-auto space-y-1.5">
+              <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto text-sm">
+                📋
               </div>
-              <h4 class="font-bold text-xs text-slate-700 dark:text-slate-200">Tidak Ada Transaksi Beban</h4>
-              <p class="text-[11px] text-slate-400">Tidak ditemukan transaksi untuk kriteria pencarian atau filter yang dipilih.</p>
-              <div class="pt-2 flex justify-center gap-2">
-                <button onclick="openTransactionModal()" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm">
+              <h4 class="font-bold text-xs text-slate-800 dark:text-slate-200">Tidak Ada Transaksi Beban</h4>
+              <p class="text-[10px] text-slate-400">Tidak ditemukan transaksi untuk kriteria pencarian atau filter yang dipilih.</p>
+              <div class="pt-1 flex justify-center gap-2">
+                <button onclick="openTransactionModal()" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-[11px] shadow-sm">
                   + Catat Beban Baru
                 </button>
               </div>
@@ -407,30 +407,30 @@ function renderDashboard() {
     } else {
       tbody.innerHTML = tableFiltered.map(t => `
         <tr class="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-          <td class="py-3 px-4">
-            <span class="font-mono text-slate-800 dark:text-slate-200 font-semibold">${t.date || '-'}</span>
-            <p class="text-[10px] text-slate-400 font-mono mt-0.5">${t.ref || '-'}</p>
+          <td class="py-2.5 px-3">
+            <span class="font-mono text-slate-800 dark:text-slate-200 font-semibold text-[11px]">${t.date || '-'}</span>
+            <p class="text-[9px] text-slate-400 font-mono">${t.ref || '-'}</p>
           </td>
-          <td class="py-3 px-4">
-            <span class="font-mono text-blue-600 dark:text-blue-400 font-semibold">${t.coa}</span>
-            <p class="text-[11px] text-slate-700 dark:text-slate-300 font-medium">${t.coaName}</p>
+          <td class="py-2.5 px-3">
+            <span class="font-mono text-blue-600 dark:text-blue-400 font-bold text-[11px]">${t.coa}</span>
+            <p class="text-[11px] text-slate-800 dark:text-slate-200 font-medium truncate max-w-[200px]">${t.coaName}</p>
           </td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-500/10 text-slate-600 dark:text-slate-300 font-medium border border-slate-500/20 whitespace-nowrap">
-              ${t.costCenter || 'CC-720 General Admin'}
+          <td class="py-2.5 px-3">
+            <span class="px-1.5 py-0.5 rounded font-mono text-[9px] bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium border border-slate-300/80 dark:border-white/10 whitespace-nowrap">
+              ${t.costCenter || 'CC-720 GA'}
             </span>
           </td>
-          <td class="py-3 px-4 max-w-xs truncate text-slate-800 dark:text-slate-200">
+          <td class="py-2.5 px-3 max-w-xs truncate text-slate-800 dark:text-slate-200 text-[11px]">
             ${t.desc}
           </td>
-          <td class="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+          <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400 font-mono text-[10px]">
             ${t.source || 'Petty Cash'}
           </td>
-          <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 dark:text-white">
+          <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900 dark:text-white text-xs">
             Rp ${formatNumber(t.amount)}
           </td>
-          <td class="py-3 px-4 text-center">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               POSTED
             </span>
           </td>
@@ -446,28 +446,28 @@ function renderDashboard() {
   if (mobContainer) {
     if (tableFiltered.length === 0) {
       mobContainer.innerHTML = `
-        <div class="p-8 text-center glass-panel rounded-2xl space-y-2">
-          <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        <div class="p-6 text-center glass-panel border border-slate-200/80 dark:border-white/10 rounded-xl space-y-1.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto text-sm">
+            📋
           </div>
           <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100">Tidak Ada Transaksi</h4>
-          <p class="text-[11px] text-slate-400">Tekan tombol (+) di bawah untuk mencatat transaksi beban baru.</p>
+          <p class="text-[10px] text-slate-400">Tekan tombol (+) atau gunakan voucher cepat di atas.</p>
         </div>
       `;
     } else {
       mobContainer.innerHTML = tableFiltered.map(t => `
-        <div class="p-4 rounded-2xl glass-panel space-y-2.5">
-          <div class="flex items-center justify-between text-[11px]">
+        <div class="p-2.5 sm:p-3 rounded-xl glass-panel border border-slate-200/80 dark:border-white/10 space-y-1.5 active:scale-[0.99] transition-transform">
+          <div class="flex items-center justify-between text-[10px]">
             <span class="font-mono text-blue-600 dark:text-blue-400 font-bold">${t.coa}</span>
-            <span class="font-mono text-slate-400 text-[10px]">${t.date || '-'} &bull; ${t.ref || '-'}</span>
+            <span class="font-mono text-slate-500 dark:text-slate-400 text-[9px]">${t.date || '-'} &bull; ${t.ref || '-'}</span>
           </div>
           <div>
-            <h4 class="font-bold text-xs text-slate-900 dark:text-white">${t.coaName}</h4>
-            <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">${t.desc}</p>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">${t.coaName}</h4>
+            <p class="text-[11px] text-slate-700 dark:text-slate-300 line-clamp-1 mt-0.5">${t.desc}</p>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-white/10 text-xs">
-            <span class="text-slate-400 text-[11px] font-mono">${t.costCenter || 'CC-720 GA'} &bull; ${t.source || 'Ops'}</span>
-            <span class="font-mono font-bold text-sm text-slate-900 dark:text-white">Rp ${formatNumber(t.amount)}</span>
+          <div class="flex items-center justify-between pt-1.5 border-t border-slate-200/60 dark:border-white/10 text-xs">
+            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">${t.costCenter || 'CC-720 GA'} &bull; ${t.source || 'Ops'}</span>
+            <span class="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">Rp ${formatNumber(t.amount)}</span>
           </div>
         </div>
       `).join('');
@@ -550,11 +550,11 @@ function setPeriodFilter(period, btn) {
   window.appState.periodFilter = period;
   document.querySelectorAll('.period-pill').forEach(b => {
     b.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-    b.classList.add('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+    b.classList.add('glass-panel', 'border', 'border-slate-300/80', 'dark:border-white/10', 'text-slate-700', 'dark:text-slate-300');
   });
   if (btn) {
     btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-    btn.classList.remove('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+    btn.classList.remove('glass-panel', 'border', 'border-slate-300/80', 'dark:border-white/10', 'text-slate-700', 'dark:text-slate-300');
   }
   renderDashboard();
 }
@@ -566,11 +566,11 @@ function setFilter(cat, btn) {
   window.appState.activeFilter = cat;
   document.querySelectorAll('.filter-pill').forEach(b => {
     b.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-    b.classList.add('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+    b.classList.add('glass-panel', 'border', 'border-slate-300/80', 'dark:border-white/10', 'text-slate-700', 'dark:text-slate-300');
   });
   if (btn) {
     btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-    btn.classList.remove('glass-panel', 'text-slate-600', 'dark:text-slate-300');
+    btn.classList.remove('glass-panel', 'border', 'border-slate-300/80', 'dark:border-white/10', 'text-slate-700', 'dark:text-slate-300');
   }
   renderDashboard();
 }
