@@ -5,52 +5,53 @@
  */
 
 // Quick expense pre-fill templates for showroom & branch operations
+// Disesuaikan 100% dengan Database COA OPEX 2021 Presisi Full (Spreadsheet Realtime)
 const EXPENSE_TEMPLATES = {
   galon: {
-    coa: '720.02.02.000',
-    coaName: 'Air Bersih PDAM & Air Minum Galon',
-    costCenter: 'CC-720 General Admin',
-    desc: 'Pembelian air mineral galon ruang pameran showroom & customer lounge',
+    coa: '711.12.00.000',
+    coaName: 'Relations Support & Customer Service (Air Galon Lounge)',
+    costCenter: 'CC-711 Selling Area',
+    desc: 'Pengadaan air minum mineral galon & snack customer lounge showroom',
     source: 'Petty Cash',
     defaultAmount: 55000
   },
   listrik: {
-    coa: '720.02.01.000',
-    coaName: 'Listrik PLN Gardu Cabang & Showroom',
+    coa: '720.01.00.000',
+    coaName: 'Electricity (Listrik PLN Operasional Cabang)',
     costCenter: 'CC-720 General Admin',
-    desc: 'Pembelian token listrik PLN operasional cabang & showroom',
+    desc: 'Pembelian token / rekening listrik PLN operasional cabang & showroom',
     source: 'Petty Cash',
     defaultAmount: 250000
   },
   ac: {
-    coa: '720.03.02.000',
-    coaName: 'Service Berkala AC Ducting Showroom',
+    coa: '712.00.01.000',
+    coaName: 'Service / Jasa (Pemeliharaan & Cuci AC Showroom)',
     costCenter: 'CC-720 General Admin',
-    desc: 'Perawatan rutin servis & cuci AC showroom ruang pamer',
+    desc: 'Jasa perawatan berkala cuci & servis AC showroom ruang pamer',
     source: 'Petty Cash',
     defaultAmount: 350000
   },
   bbm: {
-    coa: '710.03.01.000',
-    coaName: 'BBM, Tol & Parkir Armada Test Drive Sales',
-    costCenter: 'CC-710 Selling Area',
-    desc: 'BBM operasional wiraniaga / armada test drive sales',
+    coa: '713.00.00.000',
+    coaName: 'Fuel & Lubricant (BBM Armada Operasional & Genset)',
+    costCenter: 'CC-713 Operations',
+    desc: 'Pembelian BBM armada operasional / solar genset kantor cabang',
     source: 'Petty Cash',
     defaultAmount: 150000
   },
   lembur: {
-    coa: '700.02.05.000',
-    coaName: 'Meal Allowance (Uang Makan)',
-    costCenter: 'CC-720 General Admin',
-    desc: 'Konsumsi lembur penutupan buku & closing administrasi cabang',
+    coa: '701.02.00.000',
+    coaName: 'Cafetaria (Konsumsi Makan Lembur / Piket Cabang)',
+    costCenter: 'CC-701 Welfare',
+    desc: 'Penggantian uang makan & konsumsi lembur penutupan buku closing cabang',
     source: 'Petty Cash',
     defaultAmount: 120000
   },
   atk: {
-    coa: '720.01.01.000',
-    coaName: 'Alat Tulis Kantor (ATK) & Form SPK',
-    costCenter: 'CC-720 General Admin',
-    desc: 'Pengadaan kertas form SPK, nota kasir & perlengkapan kantor',
+    coa: '722.06.00.000',
+    coaName: 'Office supplies (ATK, Kertas A4 & Form SPK)',
+    costCenter: 'CC-722 General Admin',
+    desc: 'Pengadaan kertas A4, tinta printer, map ordner & form SPK administrasi',
     source: 'Petty Cash',
     defaultAmount: 85000
   }

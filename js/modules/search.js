@@ -40,6 +40,9 @@ function getAllLeafAccounts() {
       } else if (item.kodeSubBab && item.kodeSubBab !== '-' && (!item.catatanPosting || !item.catatanPosting.toLowerCase().includes('sub-bab'))) {
         code = item.kodeSubBab;
         name = item.namaSubBab;
+      } else if (item.kodeCOA && item.kodeCOA.includes('.')) {
+        code = item.kodeCOA;
+        name = item.namaAkun;
       }
 
       if (!code || !name) return;
@@ -111,23 +114,26 @@ function handleSmartSearch(rawQuery) {
             <span>Pencarian Cerdas Kamus Akun Astra SO</span>
           </div>
           <p class="text-slate-600 dark:text-slate-300">
-            Ketik kata sehari-hari transaksi Anda (seperti <em>"air galon"</em>, <em>"servis ac"</em>, <em>"token pln"</em>, <em>"bbm sales"</em>, atau <em>"ongkir towing"</em>). Sistem akan mencocokkan kode akun COA, cost center, status pajak, dan redaksi bakunya.
+            Ketik istilah transaksi operasional sehari-hari (seperti <em>"air galon"</em>, <em>"token listrik"</em>, <em>"servis ac"</em>, <em>"bbm test drive"</em>, atau <em>"ongkir towing"</em>). Sistem otomatis mencocokkan ke database COA 2021 Presisi Full beserta cost center & pajaknya.
           </p>
         </div>
 
         <div>
           <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono">Pencarian Populer Cabang:</h4>
           <div class="flex flex-wrap gap-1.5 text-xs">
-            <button onclick="selectQuickSearchTag('air galon')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">💧 Air Galon</button>
+            <button onclick="selectQuickSearchTag('air galon')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">💧 Air Galon Lounge</button>
             <button onclick="selectQuickSearchTag('token listrik pln')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">⚡ Listrik PLN</button>
-            <button onclick="selectQuickSearchTag('cuci ac showroom')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">❄️ Service AC</button>
-            <button onclick="selectQuickSearchTag('filter solar genset')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">⚙️ Sparepart Genset</button>
-            <button onclick="selectQuickSearchTag('bbm bensin test drive')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">⛽ BBM Test Drive</button>
-            <button onclick="selectQuickSearchTag('kertas atk form spk')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">📝 Kertas ATK</button>
-            <button onclick="selectQuickSearchTag('nasi kotak lembur')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🍱 Konsumsi Lembur</button>
-            <button onclick="selectQuickSearchTag('wifi biznet internet')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🌐 Internet & VPN</button>
-            <button onclick="selectQuickSearchTag('car carrier towing')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🚚 Ekspedisi Towing</button>
-            <button onclick="selectQuickSearchTag('pameran mall booth')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🎪 Pameran Mall</button>
+            <button onclick="selectQuickSearchTag('cuci ac')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">❄️ Servis AC</button>
+            <button onclick="selectQuickSearchTag('bbm solar genset')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">⛽ BBM & Solar Genset</button>
+            <button onclick="selectQuickSearchTag('bbm test drive')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🚗 BBM Test Drive / PDI</button>
+            <button onclick="selectQuickSearchTag('kertas atk')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">📝 Kertas & ATK</button>
+            <button onclick="selectQuickSearchTag('nasi kotak lembur')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🍱 Makan Lembur</button>
+            <button onclick="selectQuickSearchTag('uang lembur')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">⏰ Uang Lembur</button>
+            <button onclick="selectQuickSearchTag('wifi internet')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🌐 Internet Cabang</button>
+            <button onclick="selectQuickSearchTag('towing kirim unit')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🚚 Towing Kirim Unit</button>
+            <button onclick="selectQuickSearchTag('pameran mall')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🎪 Pameran Mall</button>
+            <button onclick="selectQuickSearchTag('security satpam')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🛡️ Security / Satpam</button>
+            <button onclick="selectQuickSearchTag('sewa gedung')" class="px-3 py-1.5 rounded-xl glass-panel hover:bg-blue-600 hover:text-white transition-all text-slate-700 dark:text-slate-300">🏢 Sewa Gedung / Ruko</button>
           </div>
         </div>
       </div>
@@ -135,57 +141,79 @@ function handleSmartSearch(rawQuery) {
     return;
   }
 
-  // 1. Cek Pencocokan Smart Intent
-  const matchedIntents = [];
-  keywords.forEach(item => {
-    if (item.trigger.some(t => query.includes(t) || t.includes(query))) {
-      matchedIntents.push(item);
-    }
-  });
+  const queryTokens = query.split(/\s+/).filter(Boolean);
 
-  // 2. Filter Database Lengkap
+  // 1. Cek Pencocokan Database Lengkap & Smart Intent
   const scoredResults = allAccounts.map(acc => {
     let score = 0;
     let matchReason = '';
 
-    // Cek kecocokan intent
-    const intentMatch = matchedIntents.find(m => m.coa === acc.code);
-    if (intentMatch) {
-      score += 60;
-      matchReason = 'Kecocokan Bahasa Alami Smart Matcher';
-    }
+    // A. Cek Smart Intent (Prioritas kecocokan bahasa operasional)
+    keywords.forEach(item => {
+      if (item.coa === acc.code && Array.isArray(item.trigger)) {
+        let bestTriggerScore = 0;
+        item.trigger.forEach(rawT => {
+          const t = rawT.toLowerCase().trim();
+          if (t === query) {
+            bestTriggerScore = Math.max(bestTriggerScore, 80);
+          } else if (t.includes(' ') && query.includes(t)) {
+            bestTriggerScore = Math.max(bestTriggerScore, 70);
+          } else if (query.includes(' ') && t.includes(query)) {
+            bestTriggerScore = Math.max(bestTriggerScore, 65);
+          } else if (queryTokens.includes(t)) {
+            bestTriggerScore = Math.max(bestTriggerScore, 50);
+          }
+        });
+        if (bestTriggerScore > 0) {
+          score += bestTriggerScore;
+          matchReason = 'Kecocokan Bahasa Alami Smart Matcher';
+        }
+      }
+    });
 
-    // Cek kecocokan nama akun
-    if (acc.name.toLowerCase().includes(query)) {
+    // B. Cek Nama Akun COA
+    const nameLower = acc.name.toLowerCase();
+    if (nameLower === query) {
+      score += 60;
+      matchReason = matchReason || 'Nama Akun COA Persis';
+    } else if (nameLower.includes(query)) {
       score += 40;
       matchReason = matchReason || 'Nama Akun COA';
+    } else if (queryTokens.some(tok => tok.length > 2 && nameLower.includes(tok))) {
+      score += 20;
+      matchReason = matchReason || 'Kata Kunci Nama Akun';
     }
 
-    // Cek kecocokan kode COA
+    // C. Cek Kode COA
     if (acc.code.includes(query)) {
       score += 50;
       matchReason = matchReason || 'Kode Akun COA';
     }
 
-    // Cek kecocokan detail penjelasan
-    if (acc.detail && acc.detail.toLowerCase().includes(query)) {
-      score += 25;
+    // D. Cek Detail Penjelasan Ruang Lingkup
+    const detailLower = acc.detail ? acc.detail.toLowerCase() : '';
+    if (detailLower.includes(query)) {
+      score += 30;
+      matchReason = matchReason || 'Detail Ruang Lingkup Akun';
+    } else if (queryTokens.some(tok => tok.length > 3 && detailLower.includes(tok))) {
+      score += 15;
       matchReason = matchReason || 'Detail Ruang Lingkup Akun';
     }
 
-    // Cek kecocokan contoh transaksi
-    if (acc.example && acc.example.toLowerCase().includes(query)) {
-      score += 30;
+    // E. Cek Contoh Redaksi Transaksi
+    const exampleLower = acc.example ? acc.example.toLowerCase() : '';
+    if (exampleLower.includes(query)) {
+      score += 25;
       matchReason = matchReason || 'Contoh Redaksi Transaksi';
     }
 
-    // Cek sub-bab / bab
-    if (acc.subgroupName.toLowerCase().includes(query)) {
+    // F. Cek Sub-bab / Bab
+    if (acc.subgroupName && acc.subgroupName.toLowerCase().includes(query)) {
       score += 15;
     }
 
-    // Cek cost center / pajak
-    if (acc.cc.toLowerCase().includes(query) || (acc.tax && acc.tax.toLowerCase().includes(query))) {
+    // G. Cek Cost Center / Status Pajak
+    if ((acc.cc && acc.cc.toLowerCase().includes(query)) || (acc.tax && acc.tax.toLowerCase().includes(query))) {
       score += 10;
     }
 
