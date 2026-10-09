@@ -555,17 +555,49 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
       </div>
 
       <!-- Responsive Table Grid -->
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto max-h-[72vh] overflow-y-auto">
         <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-200/80 dark:border-white/10 bg-slate-100/90 dark:bg-slate-800/90 text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none">
-              <th class="py-3 px-3 text-center w-10">No</th>
-              <th class="py-3 px-3 whitespace-nowrap">Kode COA</th>
-              <th class="py-3 px-3 whitespace-nowrap">Nama Akun & Sub-Bab</th>
-              <th class="py-3 px-3 whitespace-nowrap">Kategori BAB</th>
-              <th class="py-3 px-3 text-center whitespace-nowrap">Status Pajak</th>
-              <th class="py-3 px-3 text-center whitespace-nowrap">Tipe Akun</th>
-              <th class="py-3 px-3 text-right whitespace-nowrap w-28">Aksi</th>
+          <thead class="sticky top-0 z-20 shadow-sm">
+            <tr class="text-[11px] font-mono tracking-wider select-none">
+              <th class="py-3 px-3 text-center w-12 bg-slate-200/95 dark:bg-[#0c1322] text-slate-600 dark:text-slate-300 border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <span class="inline-flex items-center justify-center">#</span>
+              </th>
+              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <div class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h13.5m-13.5 7.5h13.5"/></svg>
+                  <span>KODE COA</span>
+                </div>
+              </th>
+              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <div class="flex items-center gap-1.5 text-slate-800 dark:text-slate-100">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                  <span>NAMA AKUN & SUB-BAB</span>
+                </div>
+              </th>
+              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <div class="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg>
+                  <span>KATEGORI BAB</span>
+                </div>
+              </th>
+              <th class="py-3 px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <div class="inline-flex items-center justify-center gap-1.5 text-amber-700 dark:text-amber-400">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                  <span>STATUS PAJAK</span>
+                </div>
+              </th>
+              <th class="py-3 px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+                <div class="inline-flex items-center justify-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
+                  <span>TIPE AKUN</span>
+                </div>
+              </th>
+              <th class="py-3 px-3.5 text-right whitespace-nowrap w-28 bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 font-bold backdrop-blur-md">
+                <div class="inline-flex items-center justify-end gap-1.5 text-slate-700 dark:text-slate-300 w-full">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                  <span>AKSI</span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200/40 dark:divide-white/5 font-sans">
