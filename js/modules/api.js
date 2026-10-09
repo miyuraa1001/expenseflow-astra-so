@@ -336,7 +336,7 @@ async function syncToGoogleSheets(item) {
 function triggerManualSync() {
   const url = StorageManager.getGasUrl();
   if (!url) {
-    showToast('Silakan masukkan URL Google Apps Script di menu Akun', 'info');
+    showToast('Silakan masukkan URL Google Apps Script di menu Setting', 'info');
     switchView('account');
     const panel = document.getElementById('gasConfigCollapsible');
     if (panel) panel.classList.remove('hidden');

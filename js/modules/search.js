@@ -331,7 +331,7 @@ function jumpToCoaDictionary(code) {
     coaFilter.value = code;
     filterCoaTree(code);
   }
-  showToast(`Membuka Kamus COA untuk kode ${code}`, 'info');
+  showToast(`Membuka Book COA untuk kode ${code}`, 'info');
 }
 
 function selectAccountForTransaction(code) {

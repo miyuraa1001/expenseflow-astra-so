@@ -53,7 +53,7 @@ Platform ini menjembatani operasional kasir cabang dengan standar akuntansi SAP 
 
 ## 4. Kebutuhan Fungsional (Functional Requirements)
 
-### FR-1: Kamus Master COA Realtime (10-Kolom Standard Astra SO)
+### FR-1: Book Master COA Realtime (10-Kolom Standard Astra SO)
 * **Sumber Data Murni**: Mengambil data dinamis langsung dari tab Google Spreadsheet `"COA OPEX 2021 Presisi Full"` via Google Sheets GViz API (`&headers=1`) dan Google Apps Script REST API.
 * **Struktur 10-Kolom Lengkap**: Menampilkan Kolom: `No, Kode COA, Nama Akun & Sub-Bab, Kategori BAB, Status Pajak, Tipe Akun, Aksi`.
 * **Paginasi Cerdas & Bebas Lag**: Paginasi 25, 50, 100, atau Semua Baris per halaman untuk menjaga kecepatan rendering DOM.
@@ -70,7 +70,7 @@ Platform ini menjembatani operasional kasir cabang dengan standar akuntansi SAP 
 * Contoh input: *"air galon"* $\rightarrow$ Rekomendasi: `720.01.00.000 Office Supplies`, Cost Center: `CC-720 General Admin`, Pajak: `Non-Objek PPh`, Contoh: *"Pembelian air galon showroom periode berjalan"*.
 * Tag pencarian cepat sekali-klik untuk kebutuhan rutin cabang: Air Galon, Token PLN, Service AC, Sparepart Genset, BBM Test Drive, Kertas ATK, Konsumsi Lembur, Internet & VPN, Towing Mobil, Pameran Mall.
 
-### FR-3: Buku Beban (Ledger Transaksi) & KPI Analytics
+### FR-3: Dashboard Beban (Ledger Transaksi) & KPI Analytics
 * **Form Entri Transaksi Modal**: Input tanggal, nomor referensi/nota/SPK, pilihan akun COA terintegrasi, cost center, keterangan, nominal (IDR), status pajak, dan sumber dana (*Petty Cash / Bank Transfer*).
 * **Grid KPI Real-time**:
   - *KPI 1*: Total Realisasi Opex Berjalan vs Plafon Bulanan (Rp 85,0M) lengkap dengan progress burn-rate.
@@ -82,7 +82,7 @@ Platform ini menjembatani operasional kasir cabang dengan standar akuntansi SAP 
 * Mekanisme persetujuan ganda (*Four-Eyes Principle*) untuk penambahan leaf-account baru yang diajukan oleh operator cabang.
 * Controller dapat meninjau kode usulan, nama akun, justifikasi bisnis, kategori BAB, dan cost center sebelum menyetujui (*Approve*) atau menolak (*Reject*).
 
-### FR-5: Pengaturan Akun & Sinkronisasi Dua Arah
+### FR-5: Setting & Sinkronisasi Dua Arah
 * Status login Controller Admin FinOps SO (`operator.so@astra-international.co.id`).
 * **Pengaturan Tema Visual**: Pilihan mode **Tema Gelap (*Cyber Dark*)** dan **Tema Terang (*Clean Light*)** dengan penyimpanan preferensi di `localStorage`.
 * **Sinkronisasi Otomatis & Manual**: Tombol "Sinkronkan Sekarang" dengan indikator status dot warna hijau, animasi spinner, dan panel konfigurasi URL Web App Google Apps Script & Security Token.
@@ -186,7 +186,7 @@ flowchart TD
    - **Execute as**: *Me (email akun Google Anda)*
    - **Who has access**: *Anyone* *(Wajib Anyone agar web frontend dapat mengirim dan menarik data tanpa blokir login)*
 4. Salin URL Web App yang berakhiran `/exec`.
-5. Di aplikasi web ExpenseFlow, masuk ke tab **Kamus Master COA** atau **Pengaturan**, tempelkan URL tersebut, lalu klik **Hubungkan**.
+5. Di aplikasi web ExpenseFlow, masuk ke tab **Book Master COA** atau **Setting**, tempelkan URL tersebut, lalu klik **Hubungkan**.
 
 ---
 
@@ -197,8 +197,8 @@ Untuk efisiensi kerja operator dan kasir cabang, platform dilengkapi pintasan ke
 | Shortcut | Aksi |
 | :---: | :--- |
 | <kbd>Ctrl</kbd> + <kbd>K</kbd> atau <kbd>/</kbd> | Membuka Spotlight Pencarian Cerdas bahasa alami dari mana saja |
-| <kbd>D</kbd> | Beralih langsung ke tampilan **Buku Beban (Dashboard Ledger)** |
-| <kbd>K</kbd> | Beralih langsung ke tampilan **Kamus Master COA** |
+| <kbd>D</kbd> | Beralih langsung ke tampilan **Dashboard (Ledger Beban)** |
+| <kbd>K</kbd> | Beralih langsung ke tampilan **Book (Master COA)** |
 | <kbd>F</kbd> | Membuka Spotlight Pencarian |
 | <kbd>Esc</kbd> | Menutup modal formulir, dialog pencarian, drawer persetujuan, atau script viewer |
 

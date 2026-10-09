@@ -41,10 +41,10 @@ function switchView(viewKey) {
   const titleEl = document.getElementById('pageTitle');
   const subEl = document.getElementById('pageSubtitle');
   if (viewKey === 'dashboard') {
-    if (titleEl) titleEl.textContent = 'Buku Beban Operasional';
+    if (titleEl) titleEl.textContent = 'Dashboard Beban Operasional';
     if (subEl) subEl.textContent = 'Astra Sales Operation (SO 2021) • Selling & G&A';
   } else if (viewKey === 'coa') {
-    if (titleEl) titleEl.textContent = 'Kamus Master COA Astra SO';
+    if (titleEl) titleEl.textContent = 'Book Master COA Astra SO';
     if (subEl) subEl.textContent = 'Master COA Opex 2021 Presisi Full • Standar Astra Sales Operation';
     if (typeof renderCoaView === 'function') renderCoaView();
     if (typeof fetchFromGoogleSheets === 'function') {
@@ -54,7 +54,7 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Persetujuan Kode Akun';
     if (subEl) subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
   } else if (viewKey === 'account') {
-    if (titleEl) titleEl.textContent = 'Pengaturan & Akun Astra SO';
+    if (titleEl) titleEl.textContent = 'Setting & Akun Astra SO';
     if (subEl) subEl.textContent = 'Akses Admin, Preferensi Tema & Sinkronisasi Database';
     if (typeof updateAccountViewStats === 'function') updateAccountViewStats();
     if (typeof updateThemeUi === 'function') updateThemeUi();
