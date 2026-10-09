@@ -13,7 +13,8 @@ const coaViewState = {
   activeBab: 'ALL',        // 'ALL', '700', '710', '720'
   page: 1,
   pageSize: 25,           // 25, 50, 100, atau 9999 (Semua)
-  expandedIndices: new Set() // Set of indices yang sedang terbuka detailnya
+  expandedIndices: new Set(), // Set of indices yang sedang terbuka detailnya
+  expandedTreeSubBabs: new Set() // Set of Sub-Bab IDs yang terbuka di tampilan Hierarki
 };
 
 let coaSearchDebounceTimer = null;
@@ -613,13 +614,125 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
 }
 
 /**
- * Render Tampilan Kartu Pohon Hierarki (Tree View)
+ * Helper untuk warna badge status pajak
+ */
+function getCoaTaxBadgeClass(tax) {
+  const t = String(tax || '').toLowerCase();
+  if (t.includes('bukan') || t.includes('non')) {
+    return 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20';
+  } else if (t.includes('pph 23') || t.includes('pph 21')) {
+    return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
+  } else if (t.includes('ppn') || t.includes('4(2)')) {
+    return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20';
+  }
+  return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20';
+}
+
+/**
+ * Toggle Accordion Sub-Bab pada tampilan Hierarki
+ */
+function toggleSubBabAccordion(sgId) {
+  if (!coaViewState.expandedTreeSubBabs) {
+    coaViewState.expandedTreeSubBabs = new Set();
+  }
+
+  const isCurrentlyOpen = coaViewState.expandedTreeSubBabs.has(sgId);
+  const willBeOpen = !isCurrentlyOpen;
+
+  if (willBeOpen) {
+    coaViewState.expandedTreeSubBabs.add(sgId);
+  } else {
+    coaViewState.expandedTreeSubBabs.delete(sgId);
+  }
+
+  const panel = document.getElementById(`panel-${sgId}`);
+  const chevron = document.getElementById(`chevron-${sgId}`);
+
+  if (panel) {
+    panel.classList.toggle('hidden', !willBeOpen);
+  }
+  if (chevron) {
+    chevron.classList.toggle('rotate-180', willBeOpen);
+    chevron.classList.toggle('text-blue-500', willBeOpen);
+  }
+}
+
+/**
+ * Buka atau tutup semua Sub-Bab sekaligus
+ */
+function expandAllSubBabs(expand = true) {
+  if (!coaViewState.expandedTreeSubBabs) {
+    coaViewState.expandedTreeSubBabs = new Set();
+  }
+
+  const container = document.getElementById('coaMainContainer') || document.getElementById('coaTreeContainer');
+  if (!container) return;
+
+  const panels = container.querySelectorAll('[id^="panel-"]');
+  const chevrons = container.querySelectorAll('[id^="chevron-"]');
+
+  panels.forEach(p => {
+    const sgId = p.id.replace('panel-', '');
+    if (expand) {
+      coaViewState.expandedTreeSubBabs.add(sgId);
+      p.classList.remove('hidden');
+    } else {
+      coaViewState.expandedTreeSubBabs.delete(sgId);
+      p.classList.add('hidden');
+    }
+  });
+
+  chevrons.forEach(c => {
+    c.classList.toggle('rotate-180', expand);
+    c.classList.toggle('text-blue-500', expand);
+  });
+}
+
+/**
+ * Render Tampilan Kartu Pohon Hierarki (Tree View) yang Rapi, Responsif, & Bebas Berantakan
  */
 function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
   const kw = (filterKeyword || '').toLowerCase().trim();
-  const db = window.appState.masterCoaTree || window.astraCoaDatabase || [];
+  
+  // Pastikan tree selalu tersedia dari flat database
+  let db = window.appState.masterCoaTree;
+  if (!db || !Array.isArray(db) || db.length === 0) {
+    const flatList = getActiveCoaFlatList();
+    if (flatList && flatList.length > 0) {
+      db = buildCoaTreeFromFlatList(flatList);
+      window.appState.masterCoaTree = db;
+    }
+  }
+  db = db || window.astraCoaDatabase || [];
 
-  const html = db.map(group => {
+  if (!db || db.length === 0) {
+    container.innerHTML = `<div class="p-8 text-center text-xs text-slate-400 glass-panel rounded-2xl">Database COA belum dimuat. Silakan sinkronkan data spreadsheet terlebih dahulu.</div>`;
+    return;
+  }
+
+  // Hitung total data yang cocok
+  let totalVisibleAccounts = 0;
+  let totalVisibleSubgroups = 0;
+
+  const colorClasses = {
+    emerald: {
+      text: 'text-emerald-600 dark:text-emerald-400',
+      dot: 'bg-emerald-500',
+      badge: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+    },
+    indigo: {
+      text: 'text-indigo-600 dark:text-indigo-400',
+      dot: 'bg-indigo-500',
+      badge: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30'
+    },
+    blue: {
+      text: 'text-blue-600 dark:text-blue-400',
+      dot: 'bg-blue-500',
+      badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30'
+    }
+  };
+
+  const groupsHtml = db.map(group => {
     if (babFilter !== 'ALL') {
       const gCode = String(group.groupCode || '').trim();
       if (babFilter === '700' && !gCode.startsWith('70')) return '';
@@ -628,92 +741,189 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
       if (!['700', '710', '720'].includes(babFilter) && !gCode.startsWith(babFilter)) return '';
     }
 
-    const colorClasses = {
-      emerald: {
-        text: 'text-emerald-600 dark:text-emerald-400',
-        dot: 'bg-emerald-500',
-        border: 'border-emerald-500/30'
-      },
-      indigo: {
-        text: 'text-indigo-600 dark:text-indigo-400',
-        dot: 'bg-indigo-500',
-        border: 'border-indigo-500/30'
-      },
-      blue: {
-        text: 'text-blue-600 dark:text-blue-400',
-        dot: 'bg-blue-500',
-        border: 'border-blue-500/30'
-      }
-    };
-
     const cTheme = colorClasses[group.color] || colorClasses.blue;
 
-    const filteredSubgroups = group.subgroups.map(sg => {
-      const matchedAccounts = sg.accounts.filter(a => 
+    const filteredSubgroups = (group.subgroups || []).map(sg => {
+      const matchedAccounts = (sg.accounts || []).filter(a => 
         kw === '' || 
-        a.code.toLowerCase().includes(kw) || 
-        a.name.toLowerCase().includes(kw) || 
-        (a.cc && a.cc.toLowerCase().includes(kw)) ||
-        (a.tax && a.tax.toLowerCase().includes(kw)) ||
-        (a.detail && a.detail.toLowerCase().includes(kw))
+        String(a.code || '').toLowerCase().includes(kw) || 
+        String(a.name || '').toLowerCase().includes(kw) || 
+        String(a.cc || '').toLowerCase().includes(kw) ||
+        String(a.tax || '').toLowerCase().includes(kw) ||
+        String(a.detail || '').toLowerCase().includes(kw) ||
+        String(a.example || '').toLowerCase().includes(kw)
       );
       return { ...sg, accounts: matchedAccounts };
-    }).filter(sg => sg.accounts.length > 0 || (kw !== '' && sg.name.toLowerCase().includes(kw)));
+    }).filter(sg => sg.accounts.length > 0 || (kw !== '' && String(sg.name || '').toLowerCase().includes(kw)));
 
-    if (filteredSubgroups.length === 0 && kw !== '' && !group.groupName.toLowerCase().includes(kw) && !group.groupCode.includes(kw)) {
+    if (filteredSubgroups.length === 0) {
       return '';
     }
 
-    const subgroupsToRender = filteredSubgroups.length > 0 ? filteredSubgroups : group.subgroups;
+    totalVisibleSubgroups += filteredSubgroups.length;
+    const groupAccountsCount = filteredSubgroups.reduce((sum, sg) => sum + sg.accounts.length, 0);
+    totalVisibleAccounts += groupAccountsCount;
 
     return `
-      <div class="p-3.5 sm:p-5 rounded-2xl glass-panel space-y-3.5 sm:space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
-          <div class="flex items-center gap-2 font-mono font-bold text-xs ${cTheme.text}">
+      <div class="p-3.5 sm:p-5 rounded-2xl glass-panel space-y-3.5 sm:space-y-4 shadow-sm border border-slate-200/70 dark:border-white/10">
+        <!-- BAB Header -->
+        <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3 flex-wrap gap-2">
+          <div class="flex items-center gap-2 font-mono font-bold text-xs sm:text-sm ${cTheme.text}">
             <span class="w-2.5 h-2.5 rounded-full ${cTheme.dot}"></span>
             <span>BAB ${group.groupCode} &bull; ${group.groupName}</span>
           </div>
-          <span class="text-[10px] font-mono text-slate-400">Level 1 Header</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] sm:text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200/50 dark:border-white/5">
+              ${filteredSubgroups.length} Sub-Bab &bull; ${groupAccountsCount} Akun
+            </span>
+          </div>
         </div>
 
-        <div class="space-y-3.5 sm:space-y-4">
-          ${subgroupsToRender.map(sg => `
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
-                <span class="font-mono text-slate-500 dark:text-slate-400 text-[11px]">${sg.code}</span>
-                <span class="flex-1 ml-2">${sg.name}</span>
-              </div>
-              <div class="pl-3 sm:pl-4 border-l-2 ${cTheme.border} space-y-2 text-xs font-mono">
-                ${sg.accounts.map(acc => `
-                  <div class="p-2.5 sm:p-3 border border-slate-200/40 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all space-y-1.5">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                      <div class="flex items-center gap-2">
-                        <span class="text-blue-600 dark:text-blue-400 font-bold tracking-tight">${acc.code}</span>
-                        <span class="font-sans font-semibold text-slate-800 dark:text-slate-200">${acc.name}</span>
-                      </div>
-                      <div class="flex items-center gap-1.5 flex-shrink-0">
-                        ${acc.tax && acc.tax !== '-' ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">${acc.tax}</span>` : ''}
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-500 dark:text-slate-400">${acc.cc || 'Opex'}</span>
-                        <button 
-                          type="button" 
-                          onclick="useCoaInTransaction('${acc.code}', '${acc.name.replace(/'/g, "\\'")}', '${(acc.detail || '').replace(/'/g, "\\'")}', '${acc.tax || '-'}')" 
-                          class="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-semibold transition-all active:scale-95"
-                        >Gunakan</button>
-                      </div>
-                    </div>
-                    ${acc.detail && acc.detail !== '-' ? `<p class="font-sans text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${acc.detail}</p>` : ''}
-                    ${acc.example && acc.example !== '-' ? `<p class="font-mono text-[10px] text-slate-400 dark:text-slate-500">Cth: "${acc.example}"</p>` : ''}
+        <!-- Subgroups Accordion List -->
+        <div class="space-y-3">
+          ${filteredSubgroups.map((sg, sgIdx) => {
+            const sgId = `${group.groupCode}-${sg.code || sgIdx}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+            
+            // Otomatis buka jika mencari kata kunci, atau jika belum ada set maka buka Sub-Bab pertama
+            const isOpen = kw !== '' || coaViewState.expandedTreeSubBabs.has(sgId) || (coaViewState.expandedTreeSubBabs.size === 0 && sgIdx === 0);
+            if (isOpen && !coaViewState.expandedTreeSubBabs.has(sgId)) {
+              coaViewState.expandedTreeSubBabs.add(sgId);
+            }
+
+            return `
+              <div class="rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-slate-900/40 shadow-sm transition-all">
+                <!-- Sub-Bab Header (Clickable Bar) -->
+                <button 
+                  type="button" 
+                  onclick="toggleSubBabAccordion('${sgId}')" 
+                  class="w-full p-3 sm:px-4 sm:py-3 bg-slate-100/90 dark:bg-slate-800/80 hover:bg-blue-50/70 dark:hover:bg-slate-800 flex items-center justify-between gap-2.5 transition-all text-left select-none"
+                >
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="px-2 py-0.5 rounded-lg bg-blue-600/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-mono font-bold text-xs border border-blue-500/20 flex-shrink-0">
+                      ${sg.code || '-'}
+                    </span>
+                    <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">
+                      ${sg.name || 'Beban Operasional'}
+                    </span>
                   </div>
-                `).join('')}
+
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-slate-200/80 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300">
+                      ${sg.accounts.length} Akun
+                    </span>
+                    <svg id="chevron-${sgId}" class="w-4 h-4 text-slate-400 transform transition-transform duration-200 ${isOpen ? 'rotate-180 text-blue-500' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                    </svg>
+                  </div>
+                </button>
+
+                <!-- Accounts Grid Panel -->
+                <div id="panel-${sgId}" class="${isOpen ? '' : 'hidden'} p-2.5 sm:p-3.5 grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 border-t border-slate-200/60 dark:border-white/5 bg-slate-100/30 dark:bg-black/20">
+                  ${sg.accounts.map(acc => {
+                    const escName = (acc.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const escDetail = (acc.detail || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const taxBadgeStyle = getCoaTaxBadgeClass(acc.tax);
+
+                    return `
+                      <div class="p-3 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-white/10 hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between gap-2.5">
+                        <!-- Top Row: Code Pill, Badges, & Action -->
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md bg-blue-600/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-mono font-bold text-xs border border-blue-500/20">
+                              ${acc.code}
+                            </span>
+                            ${acc.tax && acc.tax !== '-' ? `
+                              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${taxBadgeStyle}">
+                                ${acc.tax}
+                              </span>
+                            ` : ''}
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-slate-800 border border-slate-300/40 dark:border-white/5">
+                              ${acc.cc || 'Opex'}
+                            </span>
+                          </div>
+
+                          <button 
+                            type="button" 
+                            onclick="useCoaInTransaction('${acc.code}', '${escName}', '${escDetail}', '${acc.tax || '-'}')" 
+                            class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-all shadow-sm flex items-center gap-1 flex-shrink-0 active:scale-95"
+                            title="Gunakan akun ini untuk formulir Catat Beban"
+                          >
+                            <span>Gunakan</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                          </button>
+                        </div>
+
+                        <!-- Middle Row: Nama Akun -->
+                        <div>
+                          <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">
+                            ${acc.name}
+                          </h4>
+                        </div>
+
+                        <!-- Bottom Row: Detail & Redaksi Baku -->
+                        ${((acc.detail && acc.detail !== '-') || (acc.example && acc.example !== '-')) ? `
+                          <div class="pt-2 border-t border-slate-200/50 dark:border-white/5 space-y-1.5 text-[11px]">
+                            ${acc.detail && acc.detail !== '-' ? `
+                              <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
+                                <span class="font-semibold text-slate-700 dark:text-slate-300">Coverage: </span>${acc.detail}
+                              </p>
+                            ` : ''}
+                            ${acc.example && acc.example !== '-' ? `
+                              <div class="font-mono text-[10px] text-blue-600 dark:text-blue-400 bg-blue-500/5 dark:bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/15 truncate" title="${acc.example}">
+                                <span class="text-slate-400 font-sans">Redaksi: </span>"${acc.example}"
+                              </div>
+                            ` : ''}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   }).filter(Boolean).join('');
 
-  container.innerHTML = html || `<div class="p-8 text-center text-xs text-slate-400 glass-panel rounded-2xl">Tidak ada kode akun COA yang cocok dengan filter yang dipilih</div>`;
+  if (!groupsHtml) {
+    container.innerHTML = `<div class="p-8 text-center text-xs text-slate-400 glass-panel rounded-2xl">Tidak ada kode akun COA yang cocok dengan filter yang dipilih</div>`;
+    return;
+  }
+
+  // Top Summary Bar & Tree Layout Container
+  container.innerHTML = `
+    <div class="space-y-3 sm:space-y-4 pb-8">
+      <!-- Top Summary & Global Collapse Toolbar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 rounded-xl glass-panel text-xs border border-slate-200/70 dark:border-white/10 shadow-sm">
+        <div class="flex items-center gap-2 font-mono text-slate-700 dark:text-slate-200">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+          <span class="font-bold">Hierarki Akun Astra SO</span>
+          <span class="text-slate-400 dark:text-slate-500">&bull; ${totalVisibleAccounts} Akun dalam ${totalVisibleSubgroups} Sub-Bab</span>
+        </div>
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <button 
+            type="button" 
+            onclick="expandAllSubBabs(true)" 
+            class="px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-[11px] font-semibold text-slate-700 dark:text-slate-300 transition-all active:scale-95 shadow-sm"
+          >
+            Buka Semua
+          </button>
+          <button 
+            type="button" 
+            onclick="expandAllSubBabs(false)" 
+            class="px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-[11px] font-semibold text-slate-700 dark:text-slate-300 transition-all active:scale-95 shadow-sm"
+          >
+            Tutup Semua
+          </button>
+        </div>
+      </div>
+
+      <!-- BAB Groups Stack -->
+      ${groupsHtml}
+    </div>
+  `;
 }
 
 /**
@@ -889,3 +1099,5 @@ window.toggleCoaRowDetail = toggleCoaRowDetail;
 window.useCoaRow = useCoaRow;
 window.useCoaInTransaction = useCoaInTransaction;
 window.copyCoaCode = copyCoaCode;
+window.toggleSubBabAccordion = toggleSubBabAccordion;
+window.expandAllSubBabs = expandAllSubBabs;
