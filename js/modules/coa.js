@@ -360,10 +360,10 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
     if (isExpanded) {
       expandedDrawerHtml = `
         <tr class="bg-blue-500/5 dark:bg-blue-500/10 border-b border-blue-500/20 animate-fadeIn">
-          <td colspan="7" class="p-4 sm:p-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+          <td colspan="7" class="p-3 sm:p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs font-sans">
               <!-- Detail Penjelasan & Coverage -->
-              <div class="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-1.5 shadow-sm">
+              <div class="p-3 sm:p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-1.5 shadow-sm">
                 <div class="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
                   <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
                   <span>Detail Penjelasan & Cakupan Beban</span>
@@ -377,7 +377,7 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
               </div>
 
               <!-- Contoh Redaksi Teks & Catatan Posting -->
-              <div class="p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-2 shadow-sm flex flex-col justify-between">
+              <div class="p-3 sm:p-3.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/60 dark:border-white/10 space-y-2 shadow-sm flex flex-col justify-between">
                 <div>
                   <div class="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 mb-1">
                     <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
@@ -388,13 +388,13 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
                   </p>
                 </div>
                 
-                <div class="flex items-center justify-between pt-1 text-[11px]">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-[11px]">
                   <span class="text-slate-500 font-mono">Status Pajak: <strong>${row.statusPajak || '-'}</strong></span>
                   ${postingCode ? `
                     <button 
                       type="button" 
                       onclick="useCoaRow(${globalIdx})" 
-                      class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                      class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 w-full sm:w-auto"
                     >
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                       <span>Catat Beban dengan Akun Ini</span>
@@ -411,10 +411,10 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
     return `
       <tr class="${rowBg} cursor-pointer group" onclick="toggleCoaRowDetail(${globalIdx})">
         <!-- 1. No -->
-        <td class="py-3 px-3 text-center font-mono text-[11px] text-slate-400 select-none">${globalIdx + 1}</td>
+        <td class="py-2.5 sm:py-3 px-2 sm:px-3 text-center font-mono text-[11px] text-slate-400 select-none">${globalIdx + 1}</td>
         
         <!-- 2. Kode Akun -->
-        <td class="py-3 px-3 font-mono font-bold text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">
+        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 font-mono font-bold text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">
           <div class="flex items-center gap-1.5">
             <span>${postingCode || row.kodeBab || '-'}</span>
             ${postingCode ? `
@@ -431,7 +431,7 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
         </td>
 
         <!-- 3. Nama Akun -->
-        <td class="py-3 px-3 text-xs text-slate-900 dark:text-white font-medium min-w-[200px]">
+        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-xs text-slate-900 dark:text-white font-medium min-w-[170px] sm:min-w-[200px]">
           <div class="flex items-center gap-2">
             <span class="font-semibold">${postingName}</span>
             ${row.detailPenjelasan && row.detailPenjelasan !== '-' ? `
@@ -443,20 +443,20 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
         </td>
 
         <!-- 4. Kategori BAB -->
-        <td class="py-3 px-3 whitespace-nowrap">
+        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 whitespace-nowrap">
           <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${babBadgeColor}">
             BAB ${row.kodeBab || '-'}
           </span>
         </td>
 
         <!-- 5. Status Pajak -->
-        <td class="py-3 px-3 text-center whitespace-nowrap">${taxBadge}</td>
+        <td class="py-2.5 sm:py-3 px-2 sm:px-3 text-center whitespace-nowrap">${taxBadge}</td>
 
         <!-- 6. Catatan Sistem -->
-        <td class="py-3 px-3 text-center whitespace-nowrap">${postingBadge}</td>
+        <td class="py-2.5 sm:py-3 px-2 sm:px-3 text-center whitespace-nowrap">${postingBadge}</td>
 
         <!-- 7. Aksi Interaktif -->
-        <td class="py-3 px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+        <td class="py-2.5 sm:py-3 px-2 sm:px-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">
           <div class="flex items-center gap-1.5 justify-end">
             ${isLeaf && postingCode ? `
               <button 
@@ -488,14 +488,14 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
   let paginationControlsHtml = '';
   if (totalPages > 1 || totalItems > 25) {
     paginationControlsHtml = `
-      <div class="px-4 py-3 border-t border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black/5 dark:bg-white/5 text-xs font-mono">
+      <div class="px-3.5 sm:px-4 py-2.5 sm:py-3 border-t border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-black/5 dark:bg-white/5 text-[11px] sm:text-xs font-mono">
         <!-- Info Rentang Data -->
         <div class="text-slate-500 dark:text-slate-400">
           Menampilkan <strong class="text-slate-900 dark:text-white">${startIndex + 1}</strong> - <strong class="text-slate-900 dark:text-white">${endIndex}</strong> dari <strong class="text-slate-900 dark:text-white">${totalItems}</strong> baris akun
         </div>
 
         <!-- Tombol Halaman & Pilihan Baris -->
-        <div class="flex items-center gap-3 self-end sm:self-auto">
+        <div class="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full sm:w-auto">
           <!-- Pilihan Baris per Halaman -->
           <div class="flex items-center gap-1.5 text-slate-500">
             <span>Baris:</span>
@@ -543,14 +543,14 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
   container.innerHTML = `
     <div class="glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 dark:border-white/10">
       <!-- Top Info Bar -->
-      <div class="px-5 py-3 border-b border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/5 dark:bg-white/5">
-        <div class="flex items-center gap-2 text-xs font-mono">
+      <div class="px-3.5 sm:px-5 py-2.5 sm:py-3 border-b border-slate-200/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 bg-black/5 dark:bg-white/5">
+        <div class="flex items-center gap-2 text-[11px] sm:text-xs font-mono">
           <span class="w-2 h-2 rounded-full ${isLiveDb ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}"></span>
-          <span class="font-bold text-slate-800 dark:text-slate-200">${isLiveDb ? 'Spreadsheet Realtime: Tab "COA OPEX 2021 Presisi Full"' : 'Database COA Astra SO'}</span>
-          <span class="text-slate-400 dark:text-slate-500">&bull; ${totalItems} Baris Ditemukan</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200">${isLiveDb ? 'Spreadsheet Realtime' : 'Database COA Astra SO'}</span>
+          <span class="text-slate-400 dark:text-slate-500">&bull; ${totalItems} Baris</span>
         </div>
-        <div class="text-[11px] text-slate-400 font-mono">
-          Klik baris mana saja untuk melihat Detail Penjelasan & Coverage
+        <div class="text-[10px] sm:text-[11px] text-slate-400 font-mono">
+          Tap baris untuk detail penjelasan & coverage
         </div>
       </div>
 
@@ -558,41 +558,41 @@ function renderCoaTable(container, filterKeyword = '', babFilter = 'ALL') {
       <div class="overflow-x-auto max-h-[72vh] overflow-y-auto">
         <table class="w-full text-left border-collapse">
           <thead class="sticky top-0 z-20 shadow-sm">
-            <tr class="text-[11px] font-mono tracking-wider select-none">
-              <th class="py-3 px-3 text-center w-12 bg-slate-200/95 dark:bg-[#0c1322] text-slate-600 dark:text-slate-300 border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+            <tr class="text-[10px] sm:text-[11px] font-mono tracking-wider select-none">
+              <th class="py-2.5 sm:py-3.5 px-2 sm:px-3 text-center w-10 sm:w-12 bg-slate-200/95 dark:bg-[#0c1322] text-slate-600 dark:text-slate-300 border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <span class="inline-flex items-center justify-center">#</span>
               </th>
-              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <div class="flex items-center gap-1.5 text-blue-700 dark:text-blue-400">
                   <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h13.5m-13.5 7.5h13.5"/></svg>
                   <span>KODE COA</span>
                 </div>
               </th>
-              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <div class="flex items-center gap-1.5 text-slate-800 dark:text-slate-100">
                   <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                   <span>NAMA AKUN & SUB-BAB</span>
                 </div>
               </th>
-              <th class="py-3 px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <div class="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
                   <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg>
                   <span>KATEGORI BAB</span>
                 </div>
               </th>
-              <th class="py-3 px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <div class="inline-flex items-center justify-center gap-1.5 text-amber-700 dark:text-amber-400">
                   <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                   <span>STATUS PAJAK</span>
                 </div>
               </th>
-              <th class="py-3 px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 text-center whitespace-nowrap bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 border-r border-slate-300/70 dark:border-white/10 font-bold backdrop-blur-md">
                 <div class="inline-flex items-center justify-center gap-1.5 text-emerald-700 dark:text-emerald-400">
                   <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
                   <span>TIPE AKUN</span>
                 </div>
               </th>
-              <th class="py-3 px-3.5 text-right whitespace-nowrap w-28 bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 font-bold backdrop-blur-md">
+              <th class="py-2.5 sm:py-3.5 px-2.5 sm:px-3.5 text-right whitespace-nowrap w-24 sm:w-28 bg-slate-200/95 dark:bg-[#0c1322] border-b-2 border-blue-600 dark:border-blue-500 font-bold backdrop-blur-md">
                 <div class="inline-flex items-center justify-end gap-1.5 text-slate-700 dark:text-slate-300 w-full">
                   <svg class="w-3.5 h-3.5 flex-shrink-0 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
                   <span>AKSI</span>
@@ -667,7 +667,7 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
     const subgroupsToRender = filteredSubgroups.length > 0 ? filteredSubgroups : group.subgroups;
 
     return `
-      <div class="p-5 rounded-2xl glass-panel space-y-4">
+      <div class="p-3.5 sm:p-5 rounded-2xl glass-panel space-y-3.5 sm:space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200/60 dark:border-white/10 pb-3">
           <div class="flex items-center gap-2 font-mono font-bold text-xs ${cTheme.text}">
             <span class="w-2.5 h-2.5 rounded-full ${cTheme.dot}"></span>
@@ -676,16 +676,16 @@ function renderCoaTree(container, filterKeyword = '', babFilter = 'ALL') {
           <span class="text-[10px] font-mono text-slate-400">Level 1 Header</span>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-3.5 sm:space-y-4">
           ${subgroupsToRender.map(sg => `
             <div class="space-y-2">
               <div class="flex items-center justify-between text-xs font-semibold text-slate-800 dark:text-slate-200">
                 <span class="font-mono text-slate-500 dark:text-slate-400 text-[11px]">${sg.code}</span>
                 <span class="flex-1 ml-2">${sg.name}</span>
               </div>
-              <div class="pl-4 border-l-2 ${cTheme.border} space-y-2 text-xs font-mono">
+              <div class="pl-3 sm:pl-4 border-l-2 ${cTheme.border} space-y-2 text-xs font-mono">
                 ${sg.accounts.map(acc => `
-                  <div class="p-3 border border-slate-200/40 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all space-y-1.5">
+                  <div class="p-2.5 sm:p-3 border border-slate-200/40 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all space-y-1.5">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                       <div class="flex items-center gap-2">
                         <span class="text-blue-600 dark:text-blue-400 font-bold tracking-tight">${acc.code}</span>
@@ -727,11 +727,11 @@ function setCoaViewMode(mode) {
 
   if (btnTable && btnTree) {
     if (mode === 'table') {
-      btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm';
-      btnTree.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5';
+      btnTable.className = 'w-full sm:w-auto justify-center px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm';
+      btnTree.className = 'w-full sm:w-auto justify-center px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5';
     } else {
-      btnTree.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm';
-      btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5';
+      btnTree.className = 'w-full sm:w-auto justify-center px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm';
+      btnTable.className = 'w-full sm:w-auto justify-center px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5';
     }
   }
 

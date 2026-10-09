@@ -98,7 +98,7 @@ function updateCoaLiveStatusUi() {
     } else if (url) {
       sub.textContent = 'Sedang menghubungi backend Google Apps Script...';
     } else {
-      sub.textContent = 'Menampilkan database cadangan. Sambungkan URL Apps Script di bawah untuk data realtime penuh.';
+      sub.textContent = 'Menampilkan database cadangan lokal (Sinkronisasi diatur pada menu Setting).';
     }
   }
 
