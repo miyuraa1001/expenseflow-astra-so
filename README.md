@@ -70,13 +70,25 @@ Platform ini menjembatani operasional kasir cabang dengan standar akuntansi SAP 
 * Contoh input: *"air galon"* $\rightarrow$ Rekomendasi: `720.01.00.000 Office Supplies`, Cost Center: `CC-720 General Admin`, Pajak: `Non-Objek PPh`, Contoh: *"Pembelian air galon showroom periode berjalan"*.
 * Tag pencarian cepat sekali-klik untuk kebutuhan rutin cabang: Air Galon, Token PLN, Service AC, Sparepart Genset, BBM Test Drive, Kertas ATK, Konsumsi Lembur, Internet & VPN, Towing Mobil, Pameran Mall.
 
-### FR-3: Dashboard Beban (Ledger Transaksi) & KPI Analytics
-* **Form Entri Transaksi Modal**: Input tanggal, nomor referensi/nota/SPK, pilihan akun COA terintegrasi, cost center, keterangan, nominal (IDR), status pajak, dan sumber dana (*Petty Cash / Bank Transfer*).
-* **Grid KPI Real-time**:
-  - *KPI 1*: Total Realisasi Opex Berjalan vs Plafon Bulanan (Rp 85,0M) lengkap dengan progress burn-rate.
-  - *KPI 2*: Komparasi Breakdown Proporsi Selling Expenses (SE 7100) vs General & Administrative (GA 7200).
-  - *KPI 3*: Indikator Integritas Tata Kelola, Level Kepatuhan Audit Astra, dan Jumlah Pending Approval.
-* **Tabel Ledger Desktop & Kartu Responsif Mobile**: Filter pencarian instan, status postingan, dan tombol ekspor CSV laporan keuangan.
+### FR-3: Dashboard Eksekutif Beban Operasional (Executive Analytics Dashboard)
+* **4-Column Balanced Executive KPI Cards**:
+  - *KPI 1 (Total Beban vs Plafon)*: Realisasi opex berjalan vs plafon bulanan (Rp 85,0M), sisa plafon, persentase burn-rate, dan indikator status (Normal, Waspada, Mendekati Limit).
+  - *KPI 2 (Rasio SE vs G&A)*: Komparasi nominal dan persentase pengeluaran Selling Expenses (7100) vs General & Administrative (7200) dengan segmented ratio bar.
+  - *KPI 3 (Kas & Sumber Dana)*: Pemantauan kas kecil (*Petty Cash Showroom*) vs rekening operasional (*Bank Transfer / Kliring*) beserta jumlah voucher terbit.
+  - *KPI 4 (Validasi & Audit)*: Total entri voucher terverifikasi, kepatuhan PSAK Astra Dual-Control 100%, dan badge counter proposal akun pending.
+* **Struktur Beban & Chart Donut Interaktif (Pure SVG)**:
+  - Concentric circular SVG donut chart tanpa library eksternal (zero-dependency, bebas lag).
+  - Distribusi proporsi pengeluaran berdasarkan kelompok master: **BAB 700 Employee Compensation** (Emerald), **BAB 710 Selling Expenses** (Indigo), dan **BAB 720 General & Admin** (Blue).
+  - Legend komprehensif menampilkan subtotal nominal, persentase pangsa biaya, dan bar progress mikro.
+* **Top 5 Beban Operasional Terbesar (Ranking)**:
+  - Pemeringkatan 5 akun beban dengan akumulasi nominal tertinggi pada periode yang dipilih.
+  - Menampilkan badge rank (#1 s.d. #5), kode akun SAP, nama akun, cost center, persentase pangsa biaya terhadap total opex, dan bar proporsional.
+* **Voucher Cepat Beban Harian (Quick Action Shortcuts)**:
+  - Akses cepat 1-klik untuk transaksi rutin cabang: *Air Minum Galon*, *Token Listrik PLN*, *Servis AC Showroom*, *BBM Test Drive Sales*, *Uang Makan Lembur*, dan *ATK & Form SPK*.
+  - Otomatis membuka modal entri, mengisi kode akun leaf, cost center, uraian standar, sumber dana, serta mengarahkan fokus kursor langsung ke kolom nominal.
+* **Filter Periode Interaktif**:
+  - Tombol filter cepat: *Semua Waktu*, *Bulan Ini*, *7 Hari Terakhir*, dan *Hari Ini*.
+  - Terintegrasi penuh dengan filter kelompok BAB (*700, 710, 720*), kotak pencarian multi-kolom, tabel ledger desktop, kartu mobile, dan fitur ekspor CSV.
 
 ### FR-4: Dual-Control Governance (Approval Queue)
 * Mekanisme persetujuan ganda (*Four-Eyes Principle*) untuk penambahan leaf-account baru yang diajukan oleh operator cabang.

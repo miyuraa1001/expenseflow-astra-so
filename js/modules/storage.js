@@ -19,6 +19,7 @@ window.appState = {
   masterCoa: [],
   masterCoaTree: null,
   activeFilter: 'ALL',
+  periodFilter: 'ALL',
   searchQuery: '',
   pendingSuggestion: null
 };
