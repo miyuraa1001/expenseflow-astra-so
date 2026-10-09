@@ -133,6 +133,20 @@ function exportToCsv() {
   showToast('File CSV berhasil diunduh', 'success');
 }
 
+/**
+ * Reset local storage cache safely without affecting Google Sheets
+ */
+function resetLocalCache() {
+  if (confirm('Bersihkan cache lokal transaksi dan COA di browser ini? Data di Google Spreadsheet tidak akan terhapus.')) {
+    localStorage.removeItem('astra_expenseflow_transactions');
+    localStorage.removeItem('astra_master_coa_cache');
+    showToast('Cache lokal berhasil dibersihkan. Memuat ulang aplikasi...', 'info');
+    setTimeout(() => {
+      window.location.reload();
+    }, 800);
+  }
+}
+
 // Expose to window for global access
 window.formatNumber = formatNumber;
 window.showToast = showToast;
@@ -141,5 +155,7 @@ window.toggleTheme = toggleTheme;
 window.setAppTheme = setAppTheme;
 window.updateThemeUi = updateThemeUi;
 window.exportToCsv = exportToCsv;
+window.resetLocalCache = resetLocalCache;
+
 
 

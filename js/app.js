@@ -54,8 +54,8 @@ function switchView(viewKey) {
     if (titleEl) titleEl.textContent = 'Persetujuan Kode Akun';
     if (subEl) subEl.textContent = 'Antrean Otorisasi Dual-Control Controller';
   } else if (viewKey === 'account') {
-    if (titleEl) titleEl.textContent = 'Setting & Akun Astra SO';
-    if (subEl) subEl.textContent = 'Akses Admin, Preferensi Tema & Sinkronisasi Database';
+    if (titleEl) titleEl.textContent = 'Pengaturan Sistem & Cabang';
+    if (subEl) subEl.textContent = 'Astra Daihatsu Lampung • Konfigurasi FinOps & Database';
     if (typeof updateAccountViewStats === 'function') updateAccountViewStats();
     if (typeof updateThemeUi === 'function') updateThemeUi();
   }
